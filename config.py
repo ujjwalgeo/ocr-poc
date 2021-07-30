@@ -2,7 +2,7 @@
 # red color filtering, red hue range can be centered around 0 or 180
 RED_HUE_RANGE1 = [0, 5]
 RED_HUE_RANGE2 = [175, 180]
-POPPLER_INSTALL_PATH = r'/usr/local/bin'
+POPPLER_INSTALL_PATH = r'/usr/bin'
 PDF_2_IMAGE_DPI = 300
 
 # MONGODB_DB = 'mongodb://localhost:27017'

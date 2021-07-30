@@ -11,6 +11,3 @@ ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 
-
-if __name__ == "__main__":
-    logger.info("hello")
