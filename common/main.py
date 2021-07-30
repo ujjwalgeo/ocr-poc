@@ -96,6 +96,8 @@ def ocr_asbuilts(project_name, overwrite=False):
                     ep['red_ocr_analysis_id'] = None
 
                 ep_dirty = True
+            else:
+                log.info('skip ocr: %s' % ep['image'])
 
         if ep_dirty:
             mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'extracted': extracted_pages})
