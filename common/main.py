@@ -2,7 +2,6 @@ import os
 from glob import glob
 from bson import ObjectId
 from common.pdf_helper import PDFDocument
-from common.logger import logger as log
 from common.mongodb_helper import MongoHelper
 from common.azure_ocr_helper import run_ocr_restapi
 
@@ -90,20 +89,22 @@ def ocr_asbuilts(project_name, overwrite=False):
         for ep in extracted_pages:
             if overwrite or (ep.get('ocr_analysis_id') is None):
                 log.info('ocr: %s' % ep['image'])
-                ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, category='as-built')
-                mongo_helper.insert_one('azure_analysis', ocr_doc)
-                mongo_helper.insert_many('ocr_lines', ocr_lines)
-                ep['ocr_analysis_id'] = ocr_doc['_id']
+                try:
+                    ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, category='as-built')
+                    mongo_helper.insert_one('azure_analysis', ocr_doc)
+                    mongo_helper.insert_many('ocr_lines', ocr_lines)
+                    ep['ocr_analysis_id'] = ocr_doc['_id']
 
-                # red image ocr
-                if ep['has_red_pixels']:
-                    log.info('ocr: %s' % ep['red_image'])
-                    red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name, category='as-built')
-                    ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
-                else:
-                    ep['red_ocr_analysis_id'] = None
-
-                ep_dirty = True
+                    # red image ocr
+                    if ep['has_red_pixels']:
+                        log.info('ocr: %s' % ep['red_image'])
+                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name, category='as-built')
+                        ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
+                    else:
+                        ep['red_ocr_analysis_id'] = None
+                    ep_dirty = True
+                except Exception as ex:
+                    log.debug("ocr error %s" % str(ex))
             else:
                 log.info('skip ocr: %s' % ep['image'])
 
@@ -112,10 +113,14 @@ def ocr_asbuilts(project_name, overwrite=False):
 
 
 if __name__ == '__main__':
+    from common import logger
 
-    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+    folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
+    # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
     project_id = 'chicago_big'
 
-    # process_folder(folder, project_id, num_files=None)
+    logger.setup()
+    log = logger.logger
+
+    process_folder(folder, project_id, num_files=None)
     ocr_asbuilts(project_id)

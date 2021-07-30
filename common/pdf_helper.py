@@ -4,7 +4,6 @@ import time
 import PyPDF2
 import pdf2image
 import numpy as np
-from common.logger import logger as log
 from config import RED_HUE_RANGE1, RED_HUE_RANGE2, POPPLER_INSTALL_PATH, PDF_2_IMAGE_DPI
 
 """
@@ -62,7 +61,6 @@ class PDFDocument(object):
             try:
                 os.makedirs(output_dir)
             except Exception as ex:
-                log.debug('Error while creating directory %s' % output_dir)
                 raise ex
 
         self.file_path = file_path
@@ -151,7 +149,6 @@ class PDFDocument(object):
 if __name__ == '__main__':
 
     fl = '/Users/ujjwal/projects/cci/data/as-builts/chicago_test/CH1424BA_81LAB_Elevation_As_Built.pdf'
-    pdf_doc = PDFDocument(file_path=fl, output_dir='./', pages=[1, 2])
-    extracted_pages = pdf_doc.extract_pages()
+    pdf_doc = PDFDocument(file_path=fl, output_dir='./')
+    extracted_pages = pdf_doc.extract_pages(pages=[1, 2])
     print(extracted_pages)
-

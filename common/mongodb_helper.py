@@ -3,7 +3,6 @@ from datetime import datetime
 from bson import ObjectId
 import re
 from config import MONGO_DB
-from logger import logger as log
 
 
 # start mongo server
@@ -12,7 +11,6 @@ from logger import logger as log
 class MongoHelper(object):
 
     def __init__(self, dbname):
-        log.info("Connecting to %s" % MONGO_DB )
         client = MongoClient(MONGO_DB)
         try:
             client.server_info()
