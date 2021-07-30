@@ -53,7 +53,8 @@ def process_folder(input_folder, project_name, num_files=None, output_folder=Non
         except Exception as ex:
             log.debug('Error extracted pages for %s' % pdf_file)
 
-    mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
+    if len(inserted_asbuilts):
+        mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
 def ocr_asbuilts(project_name):
