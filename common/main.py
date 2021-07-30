@@ -51,9 +51,11 @@ def process_folder(input_folder, project_name, num_files=None, output_folder=Non
             }
             inserted_asbuilts.append(asbuilt)
         except Exception as ex:
-            log.debug('Error extracted pages for %s' % pdf_file)
+            log.debug('Error while extracting pages for %s' % pdf_file)
+            print(str(ex))
 
-    mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
+    if len(inserted_asbuilts):
+        mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
 def ocr_asbuilts(project_name):
@@ -62,7 +64,7 @@ def ocr_asbuilts(project_name):
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
     log.info('Will OCR %d as-builts' % as_builts.count())
 
-    for as_built in as_builts[:2]:
+    for as_built in as_builts:
         # ocr each page for as built
         extracted_pages = as_built['pages']
         # {
@@ -97,9 +99,8 @@ def ocr_asbuilts(project_name):
 if __name__ == '__main__':
 
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    folder  = r'C:\\Users\\unarayan\\Desktop\\ocr poc\\AS Builts\\pdf'
+    folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
     project_id = 'chicago_big'
 
-    process_folder(folder, project_id, num_files=1)
-    # ocr_asbuilts(project_id)
-
+    # process_folder(folder, project_id, num_files=None)
+    ocr_asbuilts(project_id)
