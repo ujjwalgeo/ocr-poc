@@ -62,13 +62,16 @@ def ocr_asbuilts(project_name, overwrite=False):
     db_name = get_dbname_from_project_name(project_name)
     mongo_helper = MongoHelper(dbname=db_name)
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
+    as_built_ids = [ab['_id'] for ab in as_builts] # save ids and get docs again in for loop to prevent cursor timeout
     log.info('Will OCR %d as-builts' % as_builts.count())
 
-    for as_built in as_builts:
+    for as_built_id in as_built_ids:
+        as_built = mongo_helper.get_document(ASBUILTS_COLLECTION, as_built_id)
+
         # ocr each page for as built
         log.info("as-built-id %s" % as_built["_id"])
         if as_built.get('pages') is None:
-            log.info('skip  as built %s since not extracted' %  as_built['_id'])
+            log.info('skip  as built %s since not extracted' % as_built['_id'])
             continue
 
         extracted_pages = as_built['pages']
