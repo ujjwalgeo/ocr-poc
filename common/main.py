@@ -58,7 +58,7 @@ def process_folder(input_folder, project_name, num_files=None, output_folder=Non
         mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
-def ocr_asbuilts(project_name):
+def ocr_asbuilts(project_name, overwrite=False):
     db_name = get_dbname_from_project_name(project_name)
     mongo_helper = MongoHelper(dbname=db_name)
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
@@ -78,22 +78,27 @@ def ocr_asbuilts(project_name):
         #     "raw_text": text,
         #     "annotations": annotation
         # }
+        ep_dirty = False
         for ep in extracted_pages:
-            log.info('ocr: %s' % ep['image'])
-            ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, category='as-built')
-            mongo_helper.insert_one('azure_analysis', ocr_doc)
-            mongo_helper.insert_many('ocr_lines', ocr_lines)
-            ep['ocr_analysis_id'] = ocr_doc['_id']
+            if overwrite or (ep.get('ocr_analysis_id') is None):
+                log.info('ocr: %s' % ep['image'])
+                ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, category='as-built')
+                mongo_helper.insert_one('azure_analysis', ocr_doc)
+                mongo_helper.insert_many('ocr_lines', ocr_lines)
+                ep['ocr_analysis_id'] = ocr_doc['_id']
 
-            # red image ocr
-            if ep['has_red_pixels']:
-                log.info('ocr: %s' % ep['red_image'])
-                red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name, category='as-built')
-                ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
-            else:
-                ep['red_ocr_analysis_id'] = None
+                # red image ocr
+                if ep['has_red_pixels']:
+                    log.info('ocr: %s' % ep['red_image'])
+                    red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name, category='as-built')
+                    ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
+                else:
+                    ep['red_ocr_analysis_id'] = None
 
-        mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'extracted': extracted_pages})
+                ep_dirty = True
+
+        if ep_dirty:
+            mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'extracted': extracted_pages})
 
 
 if __name__ == '__main__':
