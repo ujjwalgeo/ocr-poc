@@ -47,7 +47,7 @@ def process_folder(input_folder, project_name, num_files=None, output_folder=Non
                 "source_file": pdf_file,
                 "num_pages": len(pdf_doc.pages),
                 "pages": extracted,
-                "project": project_name
+                 "project": project_name
             }
             inserted_asbuilts.append(asbuilt)
         except Exception as ex:
@@ -66,6 +66,11 @@ def ocr_asbuilts(project_name, overwrite=False):
 
     for as_built in as_builts:
         # ocr each page for as built
+        log.info("as-built-id %s" % as_built["_id"])
+        if as_built.get('pages') is None:
+            log.info('skip  as built %s since not extracted' %  as_built['_id'])
+            continue
+
         extracted_pages = as_built['pages']
         # {
         #     "pdf": pdf_out_file,
@@ -100,7 +105,7 @@ def ocr_asbuilts(project_name, overwrite=False):
                 log.info('skip ocr: %s' % ep['image'])
 
         if ep_dirty:
-            mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'extracted': extracted_pages})
+            mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'pages': extracted_pages})
 
 
 if __name__ == '__main__':
