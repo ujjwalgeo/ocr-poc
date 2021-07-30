@@ -5,8 +5,8 @@ RED_HUE_RANGE2 = [175, 180]
 POPPLER_INSTALL_PATH = r'/usr/local/bin'
 PDF_2_IMAGE_DPI = 300
 
-MONGODB_HOST = 'localhost'
-MONGODB_PORT = 27017
+# MONGODB_DB = 'mongodb://localhost:27017'
+MONGO_DB = 'mongodb://dev-a360scc-db:KdetjsxZSXsLFx5OvROMzDpd4NjcmagynwuEk4XE5euVA14rCjRGOzngVioohQHFVTsPZPbAvCVF63SqENrYXA==@dev-a360scc-db.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@dev-a360scc-db@'
 
 
 AZURE_COGNITIVE_SERVICES_ENDPOINT = 'https://cci-coloocr-poc-cv.cognitiveservices.azure.com'

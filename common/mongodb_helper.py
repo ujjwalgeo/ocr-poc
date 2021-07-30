@@ -2,7 +2,8 @@ from pymongo import MongoClient, TEXT, GEO2D
 from datetime import datetime
 from bson import ObjectId
 import re
-from config import MONGODB_HOST, MONGODB_PORT
+from config import MONGO_DB
+from logger import logger as log
 
 
 # start mongo server
@@ -11,7 +12,8 @@ from config import MONGODB_HOST, MONGODB_PORT
 class MongoHelper(object):
 
     def __init__(self, dbname):
-        client = MongoClient('mongodb://%s:%d' % (MONGODB_HOST, MONGODB_PORT), serverSelectionTimeoutMS=2000)
+        log.info("Connecting to %s" % MONGO_DB )
+        client = MongoClient(MONGO_DB)
         try:
             client.server_info()
             self.db = client[dbname]

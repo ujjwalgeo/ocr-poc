@@ -18,7 +18,7 @@ def get_dbname_from_project_name(project_name):
     return db_name
 
 
-def process_folder(input_folder, project_name, output_folder=None):
+def process_folder(input_folder, project_name, num_files=None, output_folder=None):
     db_name = get_dbname_from_project_name(project_name)
     mongo_helper = MongoHelper(dbname=db_name)
 
@@ -29,9 +29,13 @@ def process_folder(input_folder, project_name, output_folder=None):
         os.makedirs(output_folder)
 
     pdf_files = glob(os.path.join(input_folder, '*.pdf'))
-
+    if not num_files is None:
+        n_files = min(len(pdf_files), num_files)
+        pdf_files = pdf_files[: n_files]
+    
     inserted_asbuilts = []
     pages = [1, 2, 3, 4]
+
     for pdf_file in pdf_files:
         log.info('Extracting pages for %s' % pdf_file)
         pdf_doc = PDFDocument(file_path=pdf_file, output_dir=output_folder)
@@ -92,7 +96,10 @@ def ocr_asbuilts(project_name):
 
 if __name__ == '__main__':
 
-    folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    project_id = 'chicago_test_7'
-    # process_folder(folder, project_id)
-    ocr_asbuilts(project_id)
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
+    folder  = r'C:\\Users\\unarayan\\Desktop\\ocr poc\\AS Builts\\pdf'
+    project_id = 'chicago_big'
+
+    process_folder(folder, project_id, num_files=1)
+    # ocr_asbuilts(project_id)
+
