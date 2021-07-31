@@ -15,3 +15,8 @@ AZURE_COGNITIVE_SERVICES_ENDPOINT = 'https://cci-coloocr-poc-cv.cognitiveservice
 AZURE_COGNITIVE_SERVICES_APIKEY = '4d41b9ddc8c346b6a7af2d1a4f7f66bd'
 
 AZURE_CUSTOM_VISION_ENDPOINT = 'https://cci-coloocr-customvision-poc-cv.cognitiveservices.azure.com'
+
+
+ASBUILTS_COLLECTION = 'asbuilts'
+AZURE_ANALYSIS_COLLECTION = 'azure_analysis'
+OCR_LINE_COLLECTION = 'ocr_line'

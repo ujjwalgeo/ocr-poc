@@ -2,7 +2,7 @@ from pymongo import MongoClient, TEXT, GEO2D
 from datetime import datetime
 from bson import ObjectId
 import re
-from config import MONGO_DB
+from common.config import MONGO_DB
 
 
 # start mongo server
@@ -63,3 +63,26 @@ class MongoHelper(object):
         query = {'text': regx, 'page': page_num, 'analysis_id': analysis_id}
         docs = coll.find(query)
         return list(docs)
+
+    def get_site_info_bbox(self, analysis_id, text='site information'):
+        docs = self.search_text('ocr_line', text=text, analysis_id=analysis_id)
+        if len(docs):
+            doc = docs[0]
+            bbox = doc['boundingBox']
+            return bbox
+
+    def get_totals_bbox(self, analysis_id, page_num=1):
+        docs = self.search_text('ocr_line', text='totals', analysis_id=analysis_id, page_num=page_num)
+        doc = docs[0]
+        bbox = doc['boundingBox']
+        return bbox
+
+    def get_equipment_key_bbox(self, analysis_id, page_num=2):
+        docs = self.search_text('ocr_line', text='Equipment Key', analysis_id=analysis_id, page_num=page_num)
+        try:
+            doc = docs[0]
+            bbox = doc['boundingBox']
+            return bbox
+        except:
+            # print('no eq key bbox for %s, %d' % (analysis_id, page_num) )
+            pass

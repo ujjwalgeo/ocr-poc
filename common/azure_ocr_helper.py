@@ -2,8 +2,7 @@ import requests
 import time
 import json
 from bson import ObjectId
-from common.mongodb_helper import MongoHelper
-from config import AZURE_COGNITIVE_SERVICES_APIKEY, AZURE_COGNITIVE_SERVICES_ENDPOINT
+from common.config import AZURE_COGNITIVE_SERVICES_APIKEY, AZURE_COGNITIVE_SERVICES_ENDPOINT
 import os
 
 
