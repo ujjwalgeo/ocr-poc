@@ -4,7 +4,7 @@ import time
 import PyPDF2
 import pdf2image
 import numpy as np
-from config import RED_HUE_RANGE1, RED_HUE_RANGE2, POPPLER_INSTALL_PATH, PDF_2_IMAGE_DPI
+from common.config import RED_HUE_RANGE1, RED_HUE_RANGE2, POPPLER_INSTALL_PATH, PDF_2_IMAGE_DPI
 
 """
 extract pages with with qpdf
@@ -98,7 +98,7 @@ class PDFDocument(object):
             if os.path.exists(pdf_out_file):
                 os.remove(pdf_out_file)
 
-            pdf_page = pdf_in.getPage(i)
+            pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
             pdf_out = PyPDF2.PdfFileWriter()
             pdf_out.addPage(pdf_page)
 

@@ -4,10 +4,7 @@ from bson import ObjectId
 from common.pdf_helper import PDFDocument
 from common.mongodb_helper import MongoHelper
 from common.azure_ocr_helper import run_ocr_restapi
-
-
-
-ASBUILTS_COLLECTION = 'asbuilts'
+from common.config import ASBUILTS_COLLECTION
 
 
 def get_dbname_from_project_name(project_name):
@@ -17,8 +14,8 @@ def get_dbname_from_project_name(project_name):
     return db_name
 
 
-def process_folder(input_folder, project_name, num_files=None, output_folder=None):
-    db_name = get_dbname_from_project_name(project_name)
+def process_folder(input_folder, project_name, db_name, num_files=None, output_folder=None):
+
     mongo_helper = MongoHelper(dbname=db_name)
 
     if output_folder is None:
@@ -57,8 +54,7 @@ def process_folder(input_folder, project_name, num_files=None, output_folder=Non
         mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
-def ocr_asbuilts(project_name, overwrite=False):
-    db_name = get_dbname_from_project_name(project_name)
+def ocr_asbuilts(project_name, db_name, overwrite=False):
     mongo_helper = MongoHelper(dbname=db_name)
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
     as_built_ids = [ab['_id'] for ab in as_builts] # save ids and get docs again in for loop to prevent cursor timeout
@@ -118,9 +114,10 @@ if __name__ == '__main__':
     folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
     # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
     project_id = 'chicago_big'
+    dbname = 'chicago_big1'
 
     logger.setup()
     log = logger.logger
 
-    process_folder(folder, project_id, num_files=None)
-    ocr_asbuilts(project_id)
+    process_folder(folder, project_id, dbname, num_files=None)
+    # ocr_asbuilts(project_id, dbname)
