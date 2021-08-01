@@ -97,8 +97,10 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
     for abp in asbuilt_pages:
 
         mongo_helper = MongoHelper(dbname)
+        analysis_id = abp.get('ocr_analysis_id')
+        if analysis_id is None:
+            continue
 
-        analysis_id = abp['ocr_analysis_id']
         analysis_doc = mongo_helper.get_document(AZURE_ANALYSIS_COLLECTION, analysis_id)
         site_info_panel_file = None
 
