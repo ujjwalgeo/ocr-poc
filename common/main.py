@@ -4,7 +4,7 @@ from bson import ObjectId
 from common.pdf_helper import PDFDocument
 from common.mongodb_helper import MongoHelper
 from common.azure_ocr_helper import run_ocr_restapi
-from common.config import ASBUILTS_COLLECTION
+from common.config import ASBUILTS_COLLECTION, OCR_LINE_COLLECTION
 
 
 def get_dbname_from_project_name(project_name):
@@ -28,7 +28,7 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
     if not num_files is None:
         n_files = min(len(pdf_files), num_files)
         pdf_files = pdf_files[: n_files]
-    
+
     inserted_asbuilts = []
     pages = [1, 2, 3, 4]
 
@@ -43,7 +43,7 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
                 "source_file": pdf_file,
                 "num_pages": len(pdf_doc.pages),
                 "pages": extracted,
-                 "project": project_name
+                "project": project_name
             }
             inserted_asbuilts.append(asbuilt)
         except Exception as ex:
@@ -86,15 +86,18 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
             if overwrite or (ep.get('ocr_analysis_id') is None):
                 log.info('ocr: %s' % ep['image'])
                 try:
-                    ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, category='as-built')
-                    mongo_helper.insert_one('azure_analysis', ocr_doc)
-                    mongo_helper.insert_many('ocr_lines', ocr_lines)
+                    ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, page_number=ep['page'],
+                                                         category='as-built')
+                    inserted_analysis_id = mongo_helper.insert_one('azure_analysis', ocr_doc)
+                    mongo_helper.insert_many(OCR_LINE_COLLECTION, ocr_lines)
                     ep['ocr_analysis_id'] = ocr_doc['_id']
 
                     # red image ocr
                     if ep['has_red_pixels']:
                         log.info('ocr: %s' % ep['red_image'])
-                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name, category='as-built')
+                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
+                                                                     page_number=ep['page'],
+                                                                     category='redline')
                         ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
                     else:
                         ep['red_ocr_analysis_id'] = None
@@ -119,5 +122,5 @@ if __name__ == '__main__':
     logger.setup()
     log = logger.logger
 
-    process_folder(folder, project_id, dbname, num_files=None)
-    # ocr_asbuilts(project_id, dbname)
+    # process_folder(folder, project_id, dbname, num_files=None)
+    ocr_asbuilts(project_id, dbname, True)
