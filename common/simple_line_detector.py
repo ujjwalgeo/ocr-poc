@@ -6,7 +6,14 @@ import pandas as pd
 import math
 
 
-def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
+def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False, overwrite=False):
+
+    ofile_name = os.path.join(os.path.dirname(image_file), "%s_%s" % (panel_name, os.path.basename(image_file)))
+    if os.path.exists(ofile_name):
+        if overwrite:
+            os.remove(ofile_name)
+        else:
+            return ofile_name
 
     centroid = [0.25 * (bbox[0] + bbox[2] + bbox[4] + bbox[6]),
                 0.25 * (bbox[1] + bbox[3] + bbox[5] + bbox[7])]
@@ -173,8 +180,6 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
 
     # poly, dangles, cuts, invalids = polygonize_full(lines)
     # print(list(poly))
-
-    ofile_name = os.path.join(os.path.dirname(image_file), "%s_%s" % (panel_name, os.path.basename(image_file)))
 
     vline1_x = vline1.geometry.centroid.x
     vline2_x = vline2.geometry.centroid.x
