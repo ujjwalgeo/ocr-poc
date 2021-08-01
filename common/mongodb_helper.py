@@ -2,7 +2,7 @@ from pymongo import MongoClient, TEXT, GEO2D
 from datetime import datetime
 from bson import ObjectId
 import re
-from common.config import MONGO_DB
+from common.config import MONGO_DB, OCR_LINE_COLLECTION, AZURE_ANALYSIS_COLLECTION, ASBUILTS_COLLECTION
 
 
 # start mongo server
@@ -65,7 +65,7 @@ class MongoHelper(object):
         return list(docs)
 
     def get_site_info_bbox(self, analysis_id, text='site information'):
-        docs = self.search_text('ocr_line', text=text, analysis_id=analysis_id)
+        docs = self.search_text(OCR_LINE_COLLECTION, text=text, analysis_id=analysis_id, page_num=1)
         if len(docs):
             doc = docs[0]
             bbox = doc['boundingBox']

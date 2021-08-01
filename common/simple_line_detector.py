@@ -11,11 +11,16 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
     centroid = [0.25 * (bbox[0] + bbox[2] + bbox[4] + bbox[6]),
                 0.25 * (bbox[1] + bbox[3] + bbox[5] + bbox[7])]
 
+    bbox_xs = [bbox[0], bbox[2], bbox[4], bbox[6]]
+    bbox_width = max(bbox_xs) - min(bbox_xs)
+    min_line_length = int(bbox_width * 1.5)
+
     img = cv2.imread(image_file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     threshold = 50
     max_val = 255
-    min_line_length = 300 # 100
+    max_buffer_pixels = 25
+
     ret, thresh = cv2.threshold(gray, threshold, max_val, cv2.THRESH_BINARY_INV)
 
     arr = thresh
@@ -23,11 +28,27 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
     n_cols = arr.shape[1]
     plot_on = img
 
+    if debug_mode:
+        # cv2.imshow('img', plot_on)
+        # cv2.imshow('gray', gray)
+        # cv2.imshow('thresh', thresh)
+        thresh_image = os.path.join(os.path.dirname(image_file), "thresh_%s" % os.path.basename(image_file))
+        cv2.imwrite(thresh_image, thresh)
+        # cv2.waitKey(0)
+
     tolerance = 1
+
     def fix_coord(val):
         if tolerance == 1:
             return val
         return (math.floor(val/tolerance)) * tolerance
+
+    # create a padding of zeros
+    padding = 2
+    arr[0:padding, :] = 0
+    # arr[padding:-1, :] = 0
+    arr[:, 0:padding] = 0
+    # arr[:, padding:-1] = 0
 
     # vertical lines
     vlines = []
@@ -62,26 +83,10 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
         line_end_indxs = row_df.index[(row_df['row_diff'] == max_val)].tolist()
 
         hlines += [ LineString([( fix_coord(l[0]), fix_coord(k)), ( fix_coord(l[1]), fix_coord(k) )])
-                    for l in zip(line_start_indxs, line_end_indxs) if ((l[1] - l[0]) > 100)]
+                    for l in zip(line_start_indxs, line_end_indxs) if ((l[1] - l[0]) > min_line_length)]
 
     # unary_union(hlines)
     # unary_union(vlines)
-
-    all_lines = hlines + vlines
-    if debug_mode:
-        for line_string in all_lines:
-            x1 = line_string.xy[0][0]
-            x2 = line_string.xy[0][1]
-
-            y1 = line_string.xy[1][0]
-            y2 = line_string.xy[1][1]
-
-            x1 = math.floor(x1)
-            y1 = math.floor(y1)
-            x2 = math.floor(x2)
-            y2 = math.floor(y2)
-
-            cv2.line(plot_on, (x1, y1), (x2, y2), (0, 0, 255), 1)
 
     g_centroid = Point(centroid)
 
@@ -103,7 +108,16 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
     vgdf['wkt'] = vgdf.geometry.apply(lambda g: g.wkt)
     vgdf = vgdf.drop_duplicates(subset='wkt', keep='first')
 
-    vgdf['intersects'] = vgdf.geometry.apply(lambda g: g.intersects(hline1.geometry) and g.intersects(hline2.geometry))
+    buffer_pixels = 0
+    while buffer_pixels < max_buffer_pixels:
+        vgdf['intersects'] = vgdf.geometry.apply(lambda g: g.buffer(buffer_pixels).intersects(hline1.geometry) or
+                                                       g.buffer(buffer_pixels).intersects(hline2.geometry))
+        num_true_list = [1 for val in vgdf['intersects'].tolist() if val]
+        num_true = len(num_true_list)
+        if num_true >= 2:
+            break
+        buffer_pixels += 1
+
     ivgdf = (vgdf[vgdf['intersects']]).copy()
     ivgdf['distance'] = ivgdf.geometry.apply(lambda g: g_centroid.distance(g))
     ivgdf['offset'] = ivgdf.geometry.apply(lambda g: 'left' if (g_centroid.x >= g.centroid.x) else 'right')
@@ -114,11 +128,30 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
     vline2 = ivgdf_right.iloc[0]
 
     hgdf_bottom = (hgdf_below[hgdf_below['distance'] > min_line_length]).copy()
-    hgdf_bottom['bottom_intersects'] = hgdf_bottom.geometry.apply(lambda g: g.intersects(vline1.geometry) and g.intersects(vline2.geometry))
+    hgdf_bottom['bottom_intersects'] = hgdf_bottom.geometry.apply(
+        lambda g: g.buffer(buffer_pixels).intersects(vline1.geometry) or
+                  g.buffer(buffer_pixels).intersects(vline2.geometry))
     iihgdf = (hgdf_bottom[hgdf_bottom['bottom_intersects']]).copy()
     bottom_hline = iihgdf.iloc[0]
-
+    all_lines = hlines + vlines
     if debug_mode:
+        # cv2.imshow('gray', gray)
+        # cv2.imshow('thresh', thresh)
+
+        for line_string in all_lines:
+            x1 = line_string.xy[0][0]
+            x2 = line_string.xy[0][1]
+
+            y1 = line_string.xy[1][0]
+            y2 = line_string.xy[1][1]
+
+            x1 = math.floor(x1)
+            y1 = math.floor(y1)
+            x2 = math.floor(x2)
+            y2 = math.floor(y2)
+
+            cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
+
         lines = [ vline1.geometry, vline2.geometry, hline1.geometry, hline2.geometry, bottom_hline.geometry ]
         for line_string in lines:
             x1 = line_string.xy[0][0]
@@ -133,6 +166,10 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
             y2 = math.floor(y2)
 
             cv2.line(plot_on, (x1, y1), (x2, y2), (255, 0, 0), 6)
+
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     # poly, dangles, cuts, invalids = polygonize_full(lines)
     # print(list(poly))
@@ -180,7 +217,19 @@ def detect_panel(image_file, bbox, panel_name="panel", debug_mode=False):
 
 
 if __name__ == "__main__":
-    image_file = '/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo/pdf_images/3_2_SFL00310_409604_NAT_Revised_As_Built/3_2_SFL00310_409604_NAT_Revised_As_Built_page-1.png'
+    from common.mongodb_helper import MongoHelper
 
-    bbox = mongo_hlpr.get_site_info_bbox(analysis_id="60f86863b566a6f90dcdbe71", page_num=1)
+    project_id = 'chicago_big'
+    dbname = 'chicago_big1'
+    mongo_helper = MongoHelper(dbname)
+
+    # works:
+    analysis_id = "6104b8ae0ca5df61eb7a1aa6"
+    image_file = '/Users/ujjwal/projects/cci/github/ocr-poc/common/asbuilts/pdf_images/CH1509BA_91LAB_Elevation_As_Built-Node/CH1509BA_91LAB_Elevation_As_Built-Node_page-1.png'
+
+    # doesn't work:
+    # analysis_id = "6104ba620ca5df61eb7a2bef"
+    # image_file = '/Users/ujjwal/projects/cci/github/ocr-poc/common/asbuilts/pdf_images/CH2262BA_21LAB_Elevation_As_Built/CH2262BA_21LAB_Elevation_As_Built_page-1.png'
+
+    bbox = mongo_helper.get_site_info_bbox(analysis_id=analysis_id)
     detect_panel(image_file, bbox, panel_name="site_info_panel", debug_mode=True)

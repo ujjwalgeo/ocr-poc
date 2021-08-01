@@ -19,4 +19,4 @@ AZURE_CUSTOM_VISION_ENDPOINT = 'https://cci-coloocr-customvision-poc-cv.cognitiv
 
 ASBUILTS_COLLECTION = 'asbuilts'
 AZURE_ANALYSIS_COLLECTION = 'azure_analysis'
-OCR_LINE_COLLECTION = 'ocr_line'
+OCR_LINE_COLLECTION = 'ocr_lines'

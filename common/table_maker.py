@@ -10,6 +10,11 @@ import os
 def detect_table(img_file, text_size_percent=3, line_distance_percent=5, debug_mode=False):
 
     img = skimage.io.imread(img_file)
+    h, w, _ = img.shape
+    padding = 2
+    img = img[padding:h-padding, padding:w-padding]
+    h, w, _ = img.shape
+
     gray = skimage.color.rgb2gray(img)
 
     # Create some large dark area with the text, 10 is quite big!
@@ -17,20 +22,18 @@ def detect_table(img_file, text_size_percent=3, line_distance_percent=5, debug_m
 
     # Compute mean values along axis 0 or 1
     hist_v = np.mean(eroded, axis=0)
-    width_v = len(hist_v) * text_size_percent // 100
-    dist_v = len(hist_v) * line_distance_percent // 100
+    width_v = w * text_size_percent // 100
+    dist_v = w * line_distance_percent // 100
     peaks_cols, proms_cols = scipy.signal.find_peaks(hist_v, width=width_v, distance=dist_v)
 
     hist_w = np.mean(eroded, axis=1)
-    width_w = len(hist_w) * text_size_percent // 100
-    dist_w = len(hist_w) * line_distance_percent // 100
+    width_w = h * text_size_percent // 100
+    dist_w = h * line_distance_percent // 100
     peaks_rows, proms_rows = scipy.signal.find_peaks(hist_w, width=width_w, distance=dist_w)
-
-    h, w, _ = img.shape
 
     # column should have atleast 5 character width
     min_col_width = 5 * w * text_size_percent / 100
-    min_row_height = 1.8 * h * text_size_percent / 100
+    min_row_height = 1.2 * h * text_size_percent / 100
     cells = []
     # if len(peaks_cols > 3):
     #     peaks_cols = peaks_cols[:-1]
@@ -72,6 +75,6 @@ def detect_table(img_file, text_size_percent=3, line_distance_percent=5, debug_m
 
 
 if __name__ == '__main__':
-
-    img_file = r'/Users/ujjwal/projects/cci/data/as-builts/demo/pdf_images/CH1361BA_71LAB_Elevation_As_Built/site_info_panel_CH1361BA_71LAB_Elevation_As_Built_page-1.png'
+    img_file = r'/Users/ujjwal/projects/cci/github/ocr-poc/common/asbuilts/pdf_images/CH1509BA_91LAB_Elevation_As_Built-Node/site_info_panel_CH1509BA_91LAB_Elevation_As_Built-Node_page-1.png'
+    # img_file = r'/Users/ujjwal/projects/cci/data/as-builts/demo/pdf_images/CH1361BA_71LAB_Elevation_As_Built/site_info_panel_CH1361BA_71LAB_Elevation_As_Built_page-1.png'
     detect_table(img_file, text_size_percent=2, line_distance_percent=2, debug_mode=True)
