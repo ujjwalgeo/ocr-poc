@@ -111,8 +111,8 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
 if __name__ == '__main__':
     from common import logger
 
-    folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
+    folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
     project_id = 'chicago_big'
     dbname = 'chicago_big1'
 
