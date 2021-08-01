@@ -105,7 +105,7 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
 
         if 'site_info' in analysis_doc:
             log.info("Skip: %s,  %s" % (analysis_id, analysis_doc["source_file"]))
-            break
+            return analysis_doc['site_info']
 
         site_info_panel_file = None
 
@@ -123,7 +123,8 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
 
             try:
                 site_info_panel_file = simple_line_detector.detect_panel(page_image, bbox,
-                                                  panel_name="site_info_panel", debug_mode=debug_mode)
+                                                  panel_name="site_info_panel", debug_mode=debug_mode,
+                                                                         overwrite=rerun_ocr)
 
                 table_file, cells = table_maker.detect_table(site_info_panel_file, text_size_percent,
                                                              line_distance_percent, debug_mode)
@@ -171,8 +172,8 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
                 site_info_kvps = _construct_site_info_tables(mongo_helper, asbuilt_id)
                 site_info["kvps"] = site_info_kvps
 
-                mongo_helper.update_document(AZURE_ANALYSIS_COLLECTION, analysis_id, {"site_info": site_info})
-                log.info("Success extracting site info abalysis: %s,  %s" % (analysis_id, analysis_doc["source_file"]))
+                mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id, {"site_info": site_info})
+                log.info("Success extracting site info asbuilt: %s,  %s" % (asbuilt_id, asbuilt["source_file"]))
 
                 break # return after first success finding panel
             except Exception as ex:
@@ -195,7 +196,7 @@ def process_panels(dbname, project_name):
     for id in ids:
         log.info("Extracting site info for %s " % id)
         site_info_panel = _extract_site_info_data(dbname, id)
-        print(site_info_panel)
+        # print(site_info_panel)
 
 
 if __name__ == '__main__':

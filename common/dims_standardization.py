@@ -4,6 +4,7 @@ import os
 import re
 from common import mongodb_helper
 from common.config import ASBUILTS_COLLECTION, AZURE_ANALYSIS_COLLECTION, OCR_LINE_COLLECTION
+from common import logger
 
 
 data =\
@@ -307,43 +308,55 @@ def _standardize_label(page_dim):
     return page_dim
 
 
-def identify_labels(project_id):
+def identify_labels(dbname, project_id):
 
     category = 'as-built'
-    analysis_docs = mongo_hlpr.query('azure_analysis', {'project_id': project_id, 'category': category})
+    mongo_hlpr = mongodb_helper.MongoHelper(dbname)
+    asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id })
+    asbuilt_ids = [ad['_id'] for ad in asbuilts]
 
-    for doc in analysis_docs:
-        print(doc.get('source_file'))
+    for doc_id in asbuilt_ids:
+        asbuilt_doc = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
+        asbuilt_pages = asbuilt_doc.get('pages')
+        if asbuilt_pages is None:
+            log.info("No pages found in %s - %s " % (asbuilt_doc["_id"], asbuilt_doc['source_file']))
+            continue
 
-        all_dims = doc.get('dims')
-        if all_dims:
-            idx = 0
-            for ad in all_dims:
-                page = ad['page']
-                dims = ad['dims']
-                count = 0
-                for pd in dims:
-                    page_dim = _standardize_label(pd)
-                    label_key = "dims.%d.dims.%d" % (idx, count)
-                    mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
-                    count += 1
+        for abp in asbuilt_pages:
+            ocr_analysis_id = abp.get('ocr_analysis_id')
+            red_analysis_id = abp.get('red_analysis_id')
+            if ocr_analysis_id:
 
-                idx += 1
 
-        all_dims = doc.get('redline_dims')
-        if all_dims:
-            idx = 0
-            for ad in all_dims:
-                page = ad['page']
-                dims = ad['dims']
-                count = 0
-                for pd in dims:
-                    page_dim = _standardize_label(pd)
-                    label_key = "redline_dims.%d.dims.%d" % (idx, count)
-                    mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
-                    count += 1
+                all_dims = doc.get('dims')
+                if all_dims:
+                    idx = 0
+                    for ad in all_dims:
+                        page = ad['page']
+                        dims = ad['dims']
+                        count = 0
+                        for pd in dims:
+                            page_dim = _standardize_label(pd)
+                            label_key = "dims.%d.dims.%d" % (idx, count)
+                            mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
+                            count += 1
 
-                idx += 1
+                        idx += 1
+
+            all_dims = doc.get('redline_dims')
+            if all_dims:
+                idx = 0
+                for ad in all_dims:
+                    page = ad['page']
+                    dims = ad['dims']
+                    count = 0
+                    for pd in dims:
+                        page_dim = _standardize_label(pd)
+                        label_key = "redline_dims.%d.dims.%d" % (idx, count)
+                        mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
+                        count += 1
+
+                    idx += 1
 
 
 def export_output_csv(project_id):
@@ -609,11 +622,16 @@ def _get_page_dims(analysis_id, n_pages, category='as-built'):
     return all_dims
 
 
-def match_dimensional_lines(project_id):
+def match_dimensional_lines(dbname, project_id):
+    category = 'as-built'
+    mongo_hlpr = mongodb_helper.MongoHelper(dbname)
+    asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
+    asbuilt_ids = [ad['_id'] for ad in asbuilts]
 
-    asbuilts = mongo_helper.query(ASBUILTS_COLLECTION, {'project': project_id})
-    for asbuilt in asbuilts:
+    for doc_id in asbuilt_ids:
+        asbuilt = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
         asbuilt_pages = asbuilt.get('pages', [])
+
         for asbuilt_page in asbuilt_pages:
             ocr_analysis_id = asbuilt_page['ocr_analysis_id']
             red_analysis_id = asbuilt_page['red_analysis_id']
@@ -644,9 +662,11 @@ def match_dimensional_lines(project_id):
 if __name__ == '__main__':
     from bson import ObjectId
     folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    project_id = 'chicago_test_7'
+    project_id = 'chicago_big'
     dbname = 'chicago_big1'
     category = "as-built"
+    logger.setup()
+    log = logger.logger
 
     mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
     match_dimensional_lines(project_id)
