@@ -169,7 +169,7 @@ def process_panels(dbname, project_name):
     for id in ids:
         log.info("Extracting site info for as-built id %s" % id)
         site_info_panel = _extract_site_info_data(mongo_helper, id)
-        print(site_info_panel)
+        log.info(str(site_info_panel))
 
 
 if __name__ == '__main__':
