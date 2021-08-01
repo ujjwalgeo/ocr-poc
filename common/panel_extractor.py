@@ -163,6 +163,7 @@ def _extract_site_info_data(mongo_helper, asbuilt_id, text_size_percent=2, line_
 def process_panels(dbname, project_name):
     # detect and write panel data
     mongo_helper = MongoHelper(dbname)
+    mongo_helper.create_ocr_line_indexes()
     _docs = mongo_helper.query(ASBUILTS_COLLECTION, {'project': project_name})
     ids = [t['_id'] for t in _docs]
 
