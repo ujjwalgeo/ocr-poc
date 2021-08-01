@@ -112,61 +112,66 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
             page = abp
             # dpi = page['image_width'] / page['pdf_width'] # 3400.0 / 17
             page_image = page['image']
-
             mongo_helper.close()
-            site_info_panel_file = simple_line_detector.detect_panel(page_image, bbox,
-                                              panel_name="site_info_panel", debug_mode=debug_mode)
 
-            table_file, cells = table_maker.detect_table(site_info_panel_file, text_size_percent,
-                                                         line_distance_percent, debug_mode)
+            try:
+                site_info_panel_file = simple_line_detector.detect_panel(page_image, bbox,
+                                                  panel_name="site_info_panel", debug_mode=debug_mode)
 
-            mongo_helper = MongoHelper(dbname)
+                table_file, cells = table_maker.detect_table(site_info_panel_file, text_size_percent,
+                                                             line_distance_percent, debug_mode)
 
-            site_info = {
-                "page": abp['page'],
-                "image_file": site_info_panel_file,
-                "table_file": table_file,
-                "cells": cells,
-            }
-
-            run_ocr = False
-            if not 'site_info' in asbuilt:
-                rerun_ocr = True
-            elif analysis_doc['site_info'] is None:
-                rerun_ocr = True
-            else:
-                if not 'analysis_id' in asbuilt['site_info']:
-                    rerun_ocr = True
-
-            if rerun_ocr:
-                run_ocr = True
-            else:
-                if not 'analysis_id' in asbuilt['site_info']:
-                    run_ocr = True
-                else:
-                    site_info["analysis_id"] = asbuilt['site_info']['analysis_id']
-            if run_ocr:
-                mongo_helper.close()
-                site_info_analysis_doc, site_info_analysis_lines = \
-                    azure_ocr_helper.run_ocr_restapi(site_info_panel_file, project_name=asbuilt['project'],
-                                        page_number=abp['page'], category="site-info")
-                site_info["analysis_id"] = site_info_analysis_doc['_id']
-
-                # re open mongo connection after ocr
                 mongo_helper = MongoHelper(dbname)
 
-                mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, site_info_analysis_doc)
-                mongo_helper.insert_many(OCR_LINE_COLLECTION, site_info_analysis_lines)
+                site_info = {
+                    "page": abp['page'],
+                    "image_file": site_info_panel_file,
+                    "table_file": table_file,
+                    "cells": cells,
+                }
 
-            mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id, {"site_info": site_info})
+                run_ocr = False
+                if not 'site_info' in asbuilt:
+                    rerun_ocr = True
+                elif analysis_doc['site_info'] is None:
+                    rerun_ocr = True
+                else:
+                    if not 'analysis_id' in asbuilt['site_info']:
+                        rerun_ocr = True
 
-            site_info_kvps = _construct_site_info_tables(mongo_helper, asbuilt_id)
-            site_info["kvps"] = site_info_kvps
+                if rerun_ocr:
+                    run_ocr = True
+                else:
+                    if not 'analysis_id' in asbuilt['site_info']:
+                        run_ocr = True
+                    else:
+                        site_info["analysis_id"] = asbuilt['site_info']['analysis_id']
+                if run_ocr:
+                    mongo_helper.close()
+                    site_info_analysis_doc, site_info_analysis_lines = \
+                        azure_ocr_helper.run_ocr_restapi(site_info_panel_file, project_name=asbuilt['project'],
+                                            page_number=abp['page'], category="site-info")
+                    site_info["analysis_id"] = site_info_analysis_doc['_id']
 
-            mongo_helper.update_document(AZURE_ANALYSIS_COLLECTION, analysis_id, {"site_info": site_info})
-            log.info("Success extracting site info abalysis: %s,  %s" % (analysis_id, analysis_doc["source_file"]))
+                    # re open mongo connection after ocr
+                    mongo_helper = MongoHelper(dbname)
 
-            break # return after first success finding panel
+                    mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, site_info_analysis_doc)
+                    mongo_helper.insert_many(OCR_LINE_COLLECTION, site_info_analysis_lines)
+
+                mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id, {"site_info": site_info})
+
+                site_info_kvps = _construct_site_info_tables(mongo_helper, asbuilt_id)
+                site_info["kvps"] = site_info_kvps
+
+                mongo_helper.update_document(AZURE_ANALYSIS_COLLECTION, analysis_id, {"site_info": site_info})
+                log.info("Success extracting site info abalysis: %s,  %s" % (analysis_id, analysis_doc["source_file"]))
+
+                break # return after first success finding panel
+            except Exception as ex:
+                log.info("Error extracting panels for %s,  %s" % (analysis_id, analysis_doc["source_file"]))
+                log.info(str(ex))
+                break
         else:
             log.info("No site info for %s,  %s" % (analysis_id, analysis_doc["source_file"]))
             mongo_helper.update_document(AZURE_ANALYSIS_COLLECTION, analysis_id, {"site_info": None})
