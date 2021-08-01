@@ -50,7 +50,7 @@ class MongoHelper(object):
                 doc['created_dt'] = datetime.now()
         self.db[coll_name].insert_many(docs, ordered=False)
 
-    def create_indexes(self, coll_name='ocr_line'):
+    def create_ocr_line_indexes(self, coll_name=OCR_LINE_COLLECTION):
         line_collection = self.db[coll_name]
         line_collection.create_index([('text', TEXT)], name='%s_text_index' % coll_name)
         line_collection.create_index([('centroid', GEO2D)], min=-10000, max=10000, name='%s_centroid_index' % coll_name)
