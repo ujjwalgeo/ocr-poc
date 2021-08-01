@@ -9,7 +9,7 @@ def setup():
     global logger
 
     # create file handler which logs even debug messages
-    fh = logging.FileHandler('ocr_poc_logger.log')
+    fh = logging.FileHandler('%s_ocr_poc_logger.log' % __name__)
     fh.setLevel(logging.DEBUG)
 
     # create console handler with a higher log level
@@ -18,7 +18,7 @@ def setup():
 
     # create formatter and add it to the handlers
     fhFormatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    chFormatter = logging.Formatter('%(levelname)s - %(filename)s - Line: %(lineno)d - %(message)s')
+    chFormatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - Line: %(lineno)d - %(message)s')
     fh.setFormatter(fhFormatter)
     ch.setFormatter(chFormatter)
 
