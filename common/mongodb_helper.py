@@ -15,8 +15,12 @@ class MongoHelper(object):
         try:
             client.server_info()
             self.db = client[dbname]
+            self.client = client
         except Exception as ex:
             raise ex
+
+    def close(self):
+        self.client.close()
 
     def query(self, coll_name, query):
         coll = self.db[coll_name]
@@ -70,6 +74,7 @@ class MongoHelper(object):
             doc = docs[0]
             bbox = doc['boundingBox']
             return bbox
+        return None
 
     def get_totals_bbox(self, analysis_id, page_num=1):
         docs = self.search_text('ocr_line', text='totals', analysis_id=analysis_id, page_num=page_num)

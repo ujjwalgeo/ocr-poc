@@ -85,19 +85,23 @@ def _construct_site_info_tables(mongo_hlpr, asbuilt_id):
     return site_info_kvps
 
 
-def _extract_site_info_data(mongo_helper, asbuilt_id, text_size_percent=2, line_distance_percent=2,
+def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distance_percent=2,
                             rerun_ocr=False, debug_mode=False):
 
+    mongo_helper = MongoHelper(dbname)
     asbuilt = mongo_helper.get_document(ASBUILTS_COLLECTION, asbuilt_id)
     asbuilt_pages = asbuilt['pages']
-
     site_info_panel_file = None
+    mongo_helper.close()
 
     for abp in asbuilt_pages:
+
+        mongo_helper = MongoHelper(dbname)
 
         analysis_id = abp['ocr_analysis_id']
         analysis_doc = mongo_helper.get_document(AZURE_ANALYSIS_COLLECTION, analysis_id)
         site_info_panel_file = None
+
         bbox = mongo_helper.get_site_info_bbox(analysis_id, text='site information')
 
         # if site information header is absent, try project summary
@@ -108,11 +112,16 @@ def _extract_site_info_data(mongo_helper, asbuilt_id, text_size_percent=2, line_
             page = abp
             # dpi = page['image_width'] / page['pdf_width'] # 3400.0 / 17
             page_image = page['image']
+
+            mongo_helper.close()
             site_info_panel_file = simple_line_detector.detect_panel(page_image, bbox,
                                               panel_name="site_info_panel", debug_mode=debug_mode)
 
             table_file, cells = table_maker.detect_table(site_info_panel_file, text_size_percent,
                                                          line_distance_percent, debug_mode)
+
+            mongo_helper = MongoHelper(dbname)
+
             site_info = {
                 "page": abp['page'],
                 "image_file": site_info_panel_file,
@@ -137,10 +146,15 @@ def _extract_site_info_data(mongo_helper, asbuilt_id, text_size_percent=2, line_
                 else:
                     site_info["analysis_id"] = asbuilt['site_info']['analysis_id']
             if run_ocr:
+                mongo_helper.close()
                 site_info_analysis_doc, site_info_analysis_lines = \
                     azure_ocr_helper.run_ocr_restapi(site_info_panel_file, project_name=asbuilt['project'],
                                         page_number=abp['page'], category="site-info")
                 site_info["analysis_id"] = site_info_analysis_doc['_id']
+
+                # re open mongo connection after ocr
+                mongo_helper = MongoHelper(dbname)
+
                 mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, site_info_analysis_doc)
                 mongo_helper.insert_many(OCR_LINE_COLLECTION, site_info_analysis_lines)
 
@@ -163,13 +177,14 @@ def _extract_site_info_data(mongo_helper, asbuilt_id, text_size_percent=2, line_
 def process_panels(dbname, project_name):
     # detect and write panel data
     mongo_helper = MongoHelper(dbname)
-    mongo_helper.create_ocr_line_indexes()
+    # mongo_helper.create_ocr_line_indexes() text index creation not supported for azure cosmos db
+
     _docs = mongo_helper.query(ASBUILTS_COLLECTION, {'project': project_name})
     ids = [t['_id'] for t in _docs]
 
     for id in ids:
         log.info("Extracting site info for as-built id %s" % id)
-        site_info_panel = _extract_site_info_data(mongo_helper, id)
+        site_info_panel = _extract_site_info_data(dbname, id)
         print(site_info_panel)
 
 
