@@ -611,11 +611,15 @@ def _get_page_dims(dbname, analysis_id, category='as-built'):
                 # print(t)
                 tokens = t.split('-')
                 if tokens and (len(tokens) > 1):
-                    label = tokens[0]
-                    dim_feet = str(tokens[1]).replace("'", "").replace(" ", "") # second token, remove feet symbol at end
-                    dim_feet = int(dim_feet)
-                    dim_inches = 0
-                    value = tokens[1]
+                    try:
+                        label = tokens[0]
+                        dim_feet = str(tokens[1]).replace("'", "").replace(" ", "") # second token, remove feet symbol at end
+                        dim_feet = int(dim_feet)
+                        dim_inches = 0
+                        value = tokens[1]
+                    except Exception as ex:
+                        log.info("Error parsing dimensions for %s" % t)
+                        log.info(str(ex))
 
             dims.append({
                 "label": label,
