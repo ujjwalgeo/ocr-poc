@@ -662,7 +662,7 @@ def match_dimensional_lines(dbname, project_id):
 
 if __name__ == '__main__':
     from bson import ObjectId
-    folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
     project_id = 'chicago_big'
     dbname = 'chicago_big1'
     category = "as-built"
