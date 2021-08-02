@@ -401,6 +401,8 @@ def export_output_csv(dbname, project_id):
     def search_dims(doc, entity, pages):
         for page in pages:
             all_dims = doc['dims']
+            if len(all_dims) <= (page-1):
+                continue
             page_dims = all_dims[page-1]['dims']
             entity = entity.lower()
             found_dims = []
@@ -414,10 +416,13 @@ def export_output_csv(dbname, project_id):
             if len(found_dims) > 1:
                 # if entity == 'fiber dist panel':
                 #     print(entity)
-
+                try:
+                    float(found_dims[0]['feet'])
+                except:
+                    return 9999
                 return np.around(0.5 * (
-                        (found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12) +
-                        (found_dims[1]['feet'] + float(found_dims[1]['inches']) / 12)), 2)
+                        (float(found_dims[0]['feet']) + float(found_dims[0]['inches']) / 12) +
+                        (float(found_dims[1]['feet']) + float(found_dims[1]['inches']) / 12)), 2)
 
         return None
 
@@ -674,9 +679,9 @@ if __name__ == '__main__':
     logger.setup()
     log = logger.logger
 
-    mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
-    match_dimensional_lines(dbname, project_id)
-    identify_labels(dbname, project_id)
+    # mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
+    # match_dimensional_lines(dbname, project_id)
+    # identify_labels(dbname, project_id)
     export_output_csv(dbname, project_id)
 
     # analysis_id = ObjectId ("60ff65991e23b73c6053a8b3")
