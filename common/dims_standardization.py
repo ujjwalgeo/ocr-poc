@@ -382,20 +382,21 @@ def export_output_csv(dbname, project_id):
     def search_redline_dims(doc, entity, pages):
         for page in pages:
             redline_dims = doc['redline_dims']
-            page_dims = redline_dims[page-1]['dims']
-            entity = entity.lower()
-            found_dims = []
-            for dim in page_dims:
-                if (dim['entity']).lower() == entity:
-                    found_dims.append(dim)
+            if len(redline_dims) > page -1:
+                page_dims = redline_dims[page-1]['dims']
+                entity = entity.lower()
+                found_dims = []
+                for dim in page_dims:
+                    if (dim['entity']).lower() == entity:
+                        found_dims.append(dim)
 
-            if len(found_dims) == 1:
-                return np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
+                if len(found_dims) == 1:
+                    return np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
 
-            if len(found_dims) > 1:
-                return np.around(0.5 * (
-                        (found_dims[0]['feet'] + found_dims[0]['inches'] / 12) +
-                        (found_dims[1]['feet'] + found_dims[1]['inches'] / 12)), 2)
+                if len(found_dims) > 1:
+                    return np.around(0.5 * (
+                            (found_dims[0]['feet'] + found_dims[0]['inches'] / 12) +
+                            (found_dims[1]['feet'] + found_dims[1]['inches'] / 12)), 2)
 
     def search_dims(doc, entity, pages):
         for page in pages:
@@ -447,7 +448,7 @@ def export_output_csv(dbname, project_id):
         if pole_height is None:
             pole_height = search_dims(ad, "PROPOSED POLE", pages=[3, 2, 4, 1])
 
-        redline_pole_height = search_redline_dims(ad, 'POLE', pages=[3, 2])
+        redline_pole_height = search_redline_dims(ad, 'POLE', pages=[3, 2, 1])
         if redline_pole_height:
             pole_height = redline_pole_height
             pole_height_comment = 'redline'
