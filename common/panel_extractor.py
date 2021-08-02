@@ -171,6 +171,7 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
 
                 site_info_kvps = _construct_site_info_tables(mongo_helper, asbuilt_id)
                 site_info["kvps"] = site_info_kvps
+                print(site_info_kvps)
 
                 mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id, {"site_info": site_info})
                 log.info("Success extracting site info asbuilt: %s,  %s" % (asbuilt_id, asbuilt["source_file"]))
