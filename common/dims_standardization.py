@@ -380,10 +380,36 @@ def export_output_csv(dbname, project_id):
     }
 
     def search_redline_dims(doc, entity, pages):
-        for page in pages:
-            redline_dims = doc['redline_dims']
-            if len(redline_dims) > page -1:
-                page_dims = redline_dims[page-1]['dims']
+        try:
+            for page in pages:
+                redline_dims = doc['redline_dims']
+                if len(redline_dims) > page -1:
+                    page_dims = redline_dims[page-1]['dims']
+                    entity = entity.lower()
+                    found_dims = []
+                    for dim in page_dims:
+                        if (dim['entity']).lower() == entity:
+                            found_dims.append(dim)
+
+                    if len(found_dims) == 1:
+                        return np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
+
+                    if len(found_dims) > 1:
+                        return np.around(0.5 * (
+                                (found_dims[0]['feet'] + found_dims[0]['inches'] / 12) +
+                                (found_dims[1]['feet'] + found_dims[1]['inches'] / 12)), 2)
+        except Exception as ex:
+            log.info(str(ex))
+
+        return None
+
+    def search_dims(doc, entity, pages):
+        try:
+            for page in pages:
+                all_dims = doc['dims']
+                if len(all_dims) <= (page-1):
+                    continue
+                page_dims = all_dims[page-1]['dims']
                 entity = entity.lower()
                 found_dims = []
                 for dim in page_dims:
@@ -391,38 +417,16 @@ def export_output_csv(dbname, project_id):
                         found_dims.append(dim)
 
                 if len(found_dims) == 1:
-                    return np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
+                    return np.around((found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12), 2)
 
                 if len(found_dims) > 1:
+                    # if entity == 'fiber dist panel':
+                    #     print(entity)
                     return np.around(0.5 * (
-                            (found_dims[0]['feet'] + found_dims[0]['inches'] / 12) +
-                            (found_dims[1]['feet'] + found_dims[1]['inches'] / 12)), 2)
-
-    def search_dims(doc, entity, pages):
-        for page in pages:
-            all_dims = doc['dims']
-            if len(all_dims) <= (page-1):
-                continue
-            page_dims = all_dims[page-1]['dims']
-            entity = entity.lower()
-            found_dims = []
-            for dim in page_dims:
-                if (dim['entity']).lower() == entity:
-                    found_dims.append(dim)
-
-            if len(found_dims) == 1:
-                return np.around((found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12), 2)
-
-            if len(found_dims) > 1:
-                # if entity == 'fiber dist panel':
-                #     print(entity)
-                try:
-                    float(found_dims[0]['feet'])
-                except:
-                    return 9999
-                return np.around(0.5 * (
-                        (float(found_dims[0]['feet']) + float(found_dims[0]['inches']) / 12) +
-                        (float(found_dims[1]['feet']) + float(found_dims[1]['inches']) / 12)), 2)
+                            (float(found_dims[0]['feet']) + float(found_dims[0]['inches']) / 12) +
+                            (float(found_dims[1]['feet']) + float(found_dims[1]['inches']) / 12)), 2)
+        except Exception as ex:
+            log.info(str(ex))
 
         return None
 
