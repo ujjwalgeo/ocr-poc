@@ -310,64 +310,56 @@ def _standardize_label(page_dim):
 
 def identify_labels(dbname, project_id):
 
-    category = 'as-built'
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id })
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
 
     for doc_id in asbuilt_ids:
-        asbuilt_doc = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
-        asbuilt_pages = asbuilt_doc.get('pages')
-        if asbuilt_pages is None:
-            log.info("No pages found in %s - %s " % (asbuilt_doc["_id"], asbuilt_doc['source_file']))
-            continue
+        doc = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
+        all_dims = doc.get('dims')
+        if all_dims:
+            idx = 0
+            for ad in all_dims:
+                dims = ad['dims']
+                count = 0
+                for pd in dims:
+                    page_dim = _standardize_label(pd)
+                    label_key = "dims.%d.dims.%d" % (idx, count)
+                    mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {label_key: page_dim})
+                    count += 1
 
-        for abp in asbuilt_pages:
-            ocr_analysis_id = abp.get('ocr_analysis_id')
-            red_analysis_id = abp.get('red_analysis_id')
-            if ocr_analysis_id:
+                idx += 1
 
+        all_dims = doc.get('redline_dims')
+        if all_dims:
+            idx = 0
+            for ad in all_dims:
+                dims = ad['dims']
+                count = 0
+                for pd in dims:
+                    page_dim = _standardize_label(pd)
+                    label_key = "redline_dims.%d.dims.%d" % (idx, count)
+                    mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {label_key: page_dim})
+                    count += 1
 
-                all_dims = doc.get('dims')
-                if all_dims:
-                    idx = 0
-                    for ad in all_dims:
-                        page = ad['page']
-                        dims = ad['dims']
-                        count = 0
-                        for pd in dims:
-                            page_dim = _standardize_label(pd)
-                            label_key = "dims.%d.dims.%d" % (idx, count)
-                            mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
-                            count += 1
-
-                        idx += 1
-
-            all_dims = doc.get('redline_dims')
-            if all_dims:
-                idx = 0
-                for ad in all_dims:
-                    page = ad['page']
-                    dims = ad['dims']
-                    count = 0
-                    for pd in dims:
-                        page_dim = _standardize_label(pd)
-                        label_key = "redline_dims.%d.dims.%d" % (idx, count)
-                        mongo_hlpr.update_document('azure_analysis', doc["_id"], {label_key: page_dim})
-                        count += 1
-
-                    idx += 1
+                idx += 1
 
 
-def export_output_csv(project_id):
-    category = 'as-built'
-    analysis_docs = mongo_hlpr.query('azure_analysis', {'project_id': project_id, 'category': category})
+def export_output_csv(dbname, project_id):
+
+    mongo_hlpr = mongodb_helper.MongoHelper(dbname)
+    asbuilt_docs = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
+    asbuilt_doc_ids = [ d["_id"] for d in asbuilt_docs ]
 
     data = {
         'scu': [],
         'jurisdiction': [],
         'file': [],
         'owner': [],
+        'latitude': [],
+        'longitude': [],
+        'address': [],
+        'county': [],
         'pole height': [],
         'pole height comment': [],
         'primary power': [],
@@ -428,16 +420,26 @@ def export_output_csv(project_id):
 
         return None
 
-    for ad in analysis_docs:
+    for doc_id in asbuilt_doc_ids:
+        ad = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
 
         if not 'site_info' in ad:
-            print('no site info - %s' % ad['source_file'] )
+            log.info('no site info - %s' % ad['source_file'] )
             continue
 
-        scu = ad['site_info']['kvps']['SCU:']
-        print('%s - %s' % (ad['source_file'], scu))
-        jurisdiction = ad['site_info']['kvps']['JURISDICTION:']
-        owner = ad['site_info']['kvps']['UTILITIES:']
+        if not 'kvps' in ad['site_info']:
+            log.info('no site info kvps - %s' % ad['source_file'] )
+            continue
+
+        kvps = ad['site_info']['kvps']
+        scu = kvps.get('SCU:', 'XXXX')
+        jurisdiction = kvps.get('JURISDICTION:', 'XXXX')
+        owner = kvps.get('UTILITIES:', 'XXXX')
+        latitude = kvps.get('LATITUDE:', 9999)
+        longitude = kvps.get('LONGITUDE:', 9999)
+        address = kvps.get('SITE ADDRESS:', 'XXXX')
+        county = kvps.get('COUNTY', 'XXXX')
+
         file = os.path.basename(ad['source_file'])
 
         pole_height = search_dims(ad, "POLE", pages=[3, 2, 4, 1])
@@ -475,6 +477,10 @@ def export_output_csv(project_id):
         data['jurisdiction'].append(jurisdiction)
         data['owner'].append(owner)
         data['file'].append(file)
+        data['latitude'].append(latitude)
+        data['longitude'].append(longitude)
+        data['county'].append(county)
+        data['address'].append(address)
 
         data['pole height'].append(pole_height)
         data['pole height comment'].append(pole_height_comment)
@@ -506,8 +512,10 @@ def export_output_csv(project_id):
     df = pd.DataFrame(data)
 
     df = df.sort_values('scu')
-    print (df.head())
-    df.to_csv('%s_output.csv' % project_id, index=False)
+    # print (df.head())
+    ofile = '%s_output.csv' % project_id
+    df.to_csv(ofile, index=False)
+    log.info('Exported output %s' % ofile)
 
 
 def _replace_words_with_errors(t):
@@ -521,7 +529,7 @@ def _replace_words_with_errors(t):
     return  " ".join(replaced)
 
 
-def _get_page_dims(analysis_id, n_pages, category='as-built'):
+def _get_page_dims(dbname, analysis_id, category='as-built'):
 
     all_dims = []
     # regx = re.compile("[0-9]+'-[0-9]+\"", re.IGNORECASE) # match with inches symbol
@@ -531,99 +539,97 @@ def _get_page_dims(analysis_id, n_pages, category='as-built'):
     regx4 = re.compile('[0-9]+ [0-9]+"', re.IGNORECASE)  # no feet symbol, must have inch separated by space
     regx5 = re.compile("[0-9]+'(?!')$", re.IGNORECASE)  # label followed by - and number with only feet symbol
 
-    for page_number in range(1, 1 + n_pages):
-        dims = []
-        for regx in [regx1, regx2, regx3, regx4, regx5]:
-        # for regx in [regx5]:
-            ocr_lines = mongo_hlpr.query('ocr_line', {"analysis_id": analysis_id, "page": page_number, "text": regx})
-            for line in ocr_lines:
-                t = line["text"]
-                t = _replace_words_with_errors(t)
+    mongo_hlpr = mongodb_helper.MongoHelper(dbname)
 
-                feet_symbol_count = len(str(t).split("\'"))
-                if feet_symbol_count > 2:
-                    print('cant parse %s' % t)
-                    continue
+    dims = []
+    for regx in [regx1, regx2, regx3, regx4, regx5]:
+    # for regx in [regx5]:
+        ocr_lines = mongo_hlpr.query(OCR_LINE_COLLECTION, {"analysis_id": analysis_id, "text": regx})
+        for line in ocr_lines:
+            t = line["text"]
+            t = _replace_words_with_errors(t)
 
-                label = ""
-                dim_feet = 0
-                dim_inches = 0
-                value = ""
+            feet_symbol_count = len(str(t).split("\'"))
+            if feet_symbol_count > 2:
+                print('cant parse %s' % t)
+                continue
 
-                if regx.pattern != regx5.pattern:
-                    mats = re.findall(regx, t)
-                    if mats:
-                        mat = mats[0]
+            label = ""
+            dim_feet = 0
+            dim_inches = 0
+            value = ""
 
-                        if mat:
-                            parts = re.split(regx, t)
-                            parts = [p.strip() for p in parts if len(p.strip())]
-                            label = ",".join(parts)
+            if regx.pattern != regx5.pattern:
+                mats = re.findall(regx, t)
+                if mats:
+                    mat = mats[0]
 
-                            # split mat into feet and inches
+                    if mat:
+                        parts = re.split(regx, t)
+                        parts = [p.strip() for p in parts if len(p.strip())]
+                        label = ",".join(parts)
 
-                            if "'" in mat:
-                                tokens = mat.split("'")
-                            elif "-" in mat:
-                                tokens = mat.split("-")
+                        # split mat into feet and inches
+
+                        if "'" in mat:
+                            tokens = mat.split("'")
+                        elif "-" in mat:
+                            tokens = mat.split("-")
+                        else:
+                            tokens = mat.split(" ")
+
+                        dim_feet = "".join([t for t in tokens[0] if t.isalnum()])
+                        if len(tokens) < 2:
+                            continue
+
+                        if r'/' in tokens[1]:
+                            # print('parsing %s' % tokens[1])
+                            inches_tokens = tokens[1].split()
+                            whole_part = "".join([t for t in inches_tokens[0] if t.isalnum()])
+                            whole_part = int(whole_part)
+                            fraction = inches_tokens[1].split(r'/')
+                            inches_num = "".join([t for t in fraction[0] if t.isalnum()])
+                            inches_deno = "".join([t for t in fraction[1] if t.isalnum()])
+                            dim_inches = whole_part + (float(inches_num) / float(inches_deno))
+                            dim_inches = np.around(dim_inches, decimals=2)
+                        else:
+                            dim_inches = "".join([t for t in tokens[1] if t.isalnum()])
+                            if len(dim_inches):
+                                dim_inches = int(dim_inches)
                             else:
-                                tokens = mat.split(" ")
+                                dim_inches = 0
+                        try:
+                            dim_feet = int(dim_feet)
+                        except Exception as  ex:
+                            print ("Error parsing dims from %s" % t)
+                            continue
 
-                            dim_feet = "".join([t for t in tokens[0] if t.isalnum()])
-                            if len(tokens) < 2:
-                                continue
+                        value = mat
 
-                            if r'/' in tokens[1]:
-                                # print('parsing %s' % tokens[1])
-                                inches_tokens = tokens[1].split()
-                                whole_part = "".join([t for t in inches_tokens[0] if t.isalnum()])
-                                whole_part = int(whole_part)
-                                fraction = inches_tokens[1].split(r'/')
-                                inches_num = "".join([t for t in fraction[0] if t.isalnum()])
-                                inches_deno = "".join([t for t in fraction[1] if t.isalnum()])
-                                dim_inches = whole_part + (float(inches_num) / float(inches_deno))
-                                dim_inches = np.around(dim_inches, decimals=2)
-                            else:
-                                dim_inches = "".join([t for t in tokens[1] if t.isalnum()])
-                                if len(dim_inches):
-                                    dim_inches = int(dim_inches)
-                                else:
-                                    dim_inches = 0
-                            try:
-                                dim_feet = int(dim_feet)
-                            except Exception as  ex:
-                                print ("Error parsing dims from %s" % t)
-                                continue
+            else:
+                # regx is regx5
+                # print(t)
+                tokens = t.split('-')
+                if tokens and (len(tokens) > 1):
+                    label = tokens[0]
+                    dim_feet = str(tokens[1]).replace("'", "").replace(" ", "") # second token, remove feet symbol at end
+                    dim_feet = int(dim_feet)
+                    dim_inches = 0
+                    value = tokens[1]
 
-                            value = mat
+            dims.append({
+                "label": label,
+                "value": value,
+                "feet": dim_feet,
+                "inches": dim_inches,
+                "line": line,
+                "analysis_category": category
+            })
 
-                else:
-                    # regx is regx5
-                    # print(t)
-                    tokens = t.split('-')
-                    if tokens and (len(tokens) > 1):
-                        label = tokens[0]
-                        dim_feet = str(tokens[1]).replace("'", "").replace(" ", "") # second token, remove feet symbol at end
-                        dim_feet = int(dim_feet)
-                        dim_inches = 0
-                        value = tokens[1]
-
-                dims.append({
-                    "label": label,
-                    "value": value,
-                    "feet": dim_feet,
-                    "inches": dim_inches,
-                    "line": line,
-                    "analysis_category": category
-                })
-
-        all_dims.append({"page": page_number, "dims": dims})
-
-    return all_dims
+    return dims
 
 
 def match_dimensional_lines(dbname, project_id):
-    category = 'as-built'
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
@@ -632,31 +638,22 @@ def match_dimensional_lines(dbname, project_id):
         asbuilt = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
         asbuilt_pages = asbuilt.get('pages', [])
 
-        for asbuilt_page in asbuilt_pages:
-            ocr_analysis_id = asbuilt_page['ocr_analysis_id']
-            red_analysis_id = asbuilt_page['red_analysis_id']
-            all_dims = _get_page_dims(ocr_analysis_id, n_pages=1, category='as-built')
-
-
-    analysis_docs = mongo_helper.query(AZURE_ANALYSIS_COLLECTION, {'project_id': project_id, 'category': 'as-built'})
-
-    for analysis_doc in analysis_docs:
-        n_pages = len(analysis_doc['extracted_pages'])
-        analysis_id = analysis_doc['_id']
-        print("processing %s,  %s" % (analysis_id, analysis_doc["source_file"]))
-
-        all_dims = _get_page_dims(analysis_id, n_pages, category='as-built')
-        mongo_helper.update_document('azure_analysis', analysis_id, {"dims": all_dims} )
-
+        all_page_dims = []
         all_redline_dims = []
-        for ep in analysis_doc['extracted_pages']:
-            if 'red_image_analysis_id' in ep:
-                redline_dims = _get_page_dims(ep['red_image_analysis_id'], 1, category='red-image')
-                if len(redline_dims):
-                    redline_dims = [ {"page": ep['page'], "dims": rd["dims"]} for rd in redline_dims] # replace with page number from extracted page as redline is always page 1
-                    all_redline_dims += redline_dims
 
-        mongo_helper.update_document('azure_analysis', analysis_id, {"redline_dims": all_redline_dims})
+        for asbuilt_page in asbuilt_pages:
+            ocr_analysis_id = asbuilt_page.get('ocr_analysis_id')
+            if ocr_analysis_id:
+                page_ocr_dims = _get_page_dims(dbname, ocr_analysis_id, category='as-built')
+                all_page_dims.append({"page": asbuilt_page['page'], "dims": page_ocr_dims})
+
+            red_analysis_id = asbuilt_page.get('red_ocr_analysis_id')
+            if red_analysis_id:
+                page_redline_dims = _get_page_dims(dbname, red_analysis_id, category='redline')
+                all_redline_dims.append({"page": asbuilt_page['page'], "dims": page_redline_dims})
+
+        mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {"dims": all_page_dims})
+        mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {"redline_dims": all_redline_dims})
 
 
 if __name__ == '__main__':
@@ -669,9 +666,9 @@ if __name__ == '__main__':
     log = logger.logger
 
     mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
-    match_dimensional_lines(project_id)
-    # identify_labels(project_id)
-    # export_output_csv(project_id)
+    match_dimensional_lines(dbname, project_id)
+    identify_labels(dbname, project_id)
+    export_output_csv(dbname, project_id)
 
     # analysis_id = ObjectId ("60ff65991e23b73c6053a8b3")
     # n_pages = 3
