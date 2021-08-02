@@ -102,12 +102,6 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
             continue
 
         analysis_doc = mongo_helper.get_document(AZURE_ANALYSIS_COLLECTION, analysis_id)
-
-        if 'site_info' in analysis_doc:
-            if 'kvps' in analysis_doc['site_info']:
-                log.info("Skip: %s,  %s" % (analysis_id, analysis_doc["source_file"]))
-                return analysis_doc['site_info']
-
         site_info_panel_file = None
 
         bbox = mongo_helper.get_site_info_bbox(analysis_id, text='site information')

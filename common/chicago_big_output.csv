@@ -1,0 +1,8 @@
+scu,jurisdiction,file,owner,latitude,longitude,address,county,pole height,pole height comment,primary power,primary power comment,secondary power,secondary power comment,fiber dist panel,fiber dist panel comment,ac load panel,ac load panel comment,street sign,street sign comment,shroud,shroud comment,antenna,antenna comment,analysis_id
+469320,CHICAGO,CH2300BA_11LAB_Elevation_NAT_Reviewed_As_Built.pdf,COMED,42.017171,-87.678371,1920 W FARGO AVE,XXXX,33.79,,33.54,,,,17.79,,15.56,,11.54,,17.02,,40.5,,6104b3ce7ca78bc7866ee8a0
+469413,CHICAGO,CH1424BA_81LAB_Elevation_As_Built.pdf,COMED,41.963169,-87.670045,1619 W SUNNYSIDE AVE,XXXX,36.17,,34.33,,,,18.0,,15.21,,8.17,,17.25,,40.58,,6104b40a7ca78bc7866ee8a2
+469511,CHICAGO,CHPH30587_SCU-469511_Redlines-Node.pdf,COMED,"41' 56' 32.44"" (41.942346)","-87 43' 00.67"" (-87.716852)",3558 W HENDERSON ST,XXXX,36.25,,33.5,,25.92,,11.75,,13.64,,7.67,,13.6,,40.5,,6104b3aa7ca78bc7866ee89e
+469575,CHICAGO,CH1509BA_91LAB_Elevation_As_Built-Node.pdf,COMED,"41' 57' 42.54"" (41.961817)","-87 45' 22.31"" (-87.756198)",5134 W AGATITE AVE,XXXX,38.83,,,,,,11.75,,13.64,,,,13.6,,40.67,,6104b3987ca78bc7866ee89d
+469865,CHICAGO,CHPH30788_469865_NAT_Redlined_As-Built.pdf,COMED,41.921424,-87.695792,2710 W PRINDMILLE ST,XXXX,38.5,,38.42,,,,15.88,,17.81,,,,17.73,,44.5,,6104b3f67ca78bc7866ee8a1
+469866,CHICAGO,CH2262BA_21LAB_Elevation_As_Built.pdf,COMED,41.916111,-87.678126,2013 W CORTLAND ST,XXXX,40.79,,43.25,,,,18.62,,16.4,,,,17.9,,49.5,,6104b41f7ca78bc7866ee8a3
+470217,CHICAGO,CHPH32493_SCU-470217_NAT_Reviewed_Redline-Node.pdf,COMED,"41' 49' 27.29"" (41.824246)","-87 39' 57.48"" (-87.665967)",1612 W 38TH PL,XXXX,33.71,,33.5,,,,13.75,,11.53,,8.46,,13.02,,40.5,,6104b3bc7ca78bc7866ee89f
