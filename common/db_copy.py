@@ -8,7 +8,7 @@ source_mongo = MONGO_DB
 target_mongo = 'mongodb://localhost:27017'
 source_db = 'chicago_big1'
 target_db = 'chicago_big1'
-batch_size = 100
+page_size = 100
 
 source_client = MongoClient(source_mongo)
 source_db = source_client[source_db]
@@ -19,7 +19,7 @@ target_db = target_client[target_db]
 collections = [ASBUILTS_COLLECTION, OCR_LINE_COLLECTION, AZURE_ANALYSIS_COLLECTION]
 
 
-def idlimit(collection, page_size, last_id=None):
+def idlimit(collection, last_id=None):
     """Function returns `page_size` number of documents after last_id
     and the new last_id.
     """
@@ -50,7 +50,7 @@ def copy_collection(collection):
 
     data, last_id = idlimit(source_docs)
     while not (last_id is None):
-        target_docs.insert_many(data, ordering=False)
+        target_docs.insert_many(data, ordered=True)
         data, last_id = idlimit(source_docs, last_id)
         log.info(last_id)
 
