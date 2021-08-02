@@ -584,17 +584,17 @@ def _get_page_dims(dbname, analysis_id, category='as-built'):
 
                         if r'/' in tokens[1]:
                             # print('parsing %s' % tokens[1])
-                            inches_tokens = tokens[1].split()
-                            whole_part = "".join([t for t in inches_tokens[0] if t.isalnum()])
-                            whole_part = int(whole_part)
-                            fraction = inches_tokens[1].split(r'/')
-                            inches_num = "".join([t for t in fraction[0] if t.isalnum()])
-                            inches_deno = "".join([t for t in fraction[1] if t.isalnum()])
                             try:
+                                inches_tokens = tokens[1].split()
+                                whole_part = "".join([t for t in inches_tokens[0] if t.isalnum()])
+                                whole_part = int(whole_part)
+                                fraction = inches_tokens[1].split(r'/')
+                                inches_num = "".join([t for t in fraction[0] if t.isalnum()])
+                                inches_deno = "".join([t for t in fraction[1] if t.isalnum()])
                                 dim_inches = whole_part + (float(inches_num) / float(inches_deno))
                                 dim_inches = np.around(dim_inches, decimals=2)
                             except Exception as ex:
-                                log.info('Error calculating dim inches %s' % t)
+                                log.info('Error calculating dims %s' % t)
                                 log.info(str(ex))
                         else:
                             dim_inches = "".join([t for t in tokens[1] if t.isalnum()])
