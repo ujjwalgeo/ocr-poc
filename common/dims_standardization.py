@@ -590,8 +590,12 @@ def _get_page_dims(dbname, analysis_id, category='as-built'):
                             fraction = inches_tokens[1].split(r'/')
                             inches_num = "".join([t for t in fraction[0] if t.isalnum()])
                             inches_deno = "".join([t for t in fraction[1] if t.isalnum()])
-                            dim_inches = whole_part + (float(inches_num) / float(inches_deno))
-                            dim_inches = np.around(dim_inches, decimals=2)
+                            try:
+                                dim_inches = whole_part + (float(inches_num) / float(inches_deno))
+                                dim_inches = np.around(dim_inches, decimals=2)
+                            except Exception as ex:
+                                log.info('Error calculating dim inches %s' % t)
+                                log.info(str(ex))
                         else:
                             dim_inches = "".join([t for t in tokens[1] if t.isalnum()])
                             if len(dim_inches):
@@ -599,7 +603,7 @@ def _get_page_dims(dbname, analysis_id, category='as-built'):
                             else:
                                 dim_inches = 0
                         try:
-                            dim_feet = int(dim_feet)
+                            dim_feet = float(dim_feet)
                         except Exception as  ex:
                             print ("Error parsing dims from %s" % t)
                             continue
@@ -614,7 +618,7 @@ def _get_page_dims(dbname, analysis_id, category='as-built'):
                     try:
                         label = tokens[0]
                         dim_feet = str(tokens[1]).replace("'", "").replace(" ", "") # second token, remove feet symbol at end
-                        dim_feet = int(dim_feet)
+                        dim_feet = float(dim_feet)
                         dim_inches = 0
                         value = tokens[1]
                     except Exception as ex:
