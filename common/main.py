@@ -63,7 +63,7 @@ def ocr_red_images(project_name, db_name, overwrite=True):
     for as_built_id in as_built_ids:
         as_built = mongo_helper.get_document(ASBUILTS_COLLECTION, as_built_id)
         # ocr each page for as built
-        log.info("as-built-id %s" % as_built["_id"])
+        # log.info("as-built-id %s" % as_built["_id"])
         if as_built.get('pages') is None:
             log.info('skip  as built %s since not extracted' % as_built['_id'])
             continue
@@ -75,7 +75,7 @@ def ocr_red_images(project_name, db_name, overwrite=True):
                 try:
                     # red image ocr
                     if ep['has_red_pixels']:
-                        log.info('ocr: %s' % ep['red_image'])
+                        log.info('ocr red: %s' % ep['red_image'])
                         red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
                                                                      page_number=ep['page'],
                                                                      category='redline')
@@ -157,12 +157,18 @@ if __name__ == '__main__':
     from common import logger
 
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
-    project_id = 'chicago_big'
-    dbname = 'chicago_big1'
+    # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+    # project_id = 'chicago_big'
+    # dbname = 'chicago_big1'
+
+    folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
+    project_id = 'colo_test_set'
+    dbname = 'colo_test_set'
 
     logger.setup()
     log = logger.logger
 
     # process_folder(folder, project_id, dbname, num_files=None)
     ocr_asbuilts(project_id, dbname, True)
+    ocr_red_images(project_id, dbname)
+
