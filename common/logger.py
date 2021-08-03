@@ -1,15 +1,19 @@
 import logging
+from datetime import datetime
 
 
 logger = None
 
 
-def setup():
+def setup(name = None):
 
     global logger
 
+    if name is None:
+        name = __name__
+
     # create file handler which logs even debug messages
-    fh = logging.FileHandler('%s_ocr_poc_logger.log' % __name__)
+    fh = logging.FileHandler('%s_%s-ocr_poc_logger.log' % (name, str(datetime.now())))
     fh.setLevel(logging.DEBUG)
 
     # create console handler with a higher log level

@@ -29,11 +29,13 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
         n_files = min(len(pdf_files), num_files)
         pdf_files = pdf_files[: n_files]
 
+    pdf_files = sorted(pdf_files)
     inserted_asbuilts = []
     pages = [1, 2, 3, 4]
-
+    idx = 0
+    n_files = len(pdf_files)
     for pdf_file in pdf_files:
-        log.info('Extracting pages for %s' % pdf_file)
+        log.info('Extracting pages for %s (%d of %d)' % (pdf_file, idx+1, n_files))
         pdf_doc = PDFDocument(file_path=pdf_file, output_dir=output_folder)
         asbuilt_oid = ObjectId()
         try:
@@ -49,6 +51,7 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
         except Exception as ex:
             log.debug('Error while extracting pages for %s' % pdf_file)
             print(str(ex))
+        idx += 1
 
     if len(inserted_asbuilts):
         mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
@@ -98,12 +101,14 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
     as_built_ids = [ab['_id'] for ab in as_builts] # save ids and get docs again in for loop to prevent cursor timeout
     log.info('Will OCR %d as-builts' % as_builts.count())
-
+    n_docs = len(as_built_ids)
+    idx = 0
     for as_built_id in as_built_ids:
+        idx += 1
         as_built = mongo_helper.get_document(ASBUILTS_COLLECTION, as_built_id)
 
         # ocr each page for as built
-        log.info("as-built-id %s" % as_built["_id"])
+        log.info("as-built-id %s, %d of %d" % (as_built["_id"], idx, n_docs))
         if as_built.get('pages') is None:
             log.info('skip  as built %s since not extracted' % as_built['_id'])
             continue
@@ -168,7 +173,7 @@ if __name__ == '__main__':
     logger.setup()
     log = logger.logger
 
-    # process_folder(folder, project_id, dbname, num_files=None)
+    process_folder(folder, project_id, dbname, num_files=None)
     ocr_asbuilts(project_id, dbname, True)
     ocr_red_images(project_id, dbname)
 

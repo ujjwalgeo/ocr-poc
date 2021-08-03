@@ -114,7 +114,7 @@ class PDFDocument(object):
                 os.remove(img_out_file)
 
             img = images[0]
-            img = img.thumbnail((10000, 10000), Image.ANTIALIAS)
+            img = img.thumbnail((10000, 10000), Image.ANTIALIAS) # max image size for azure vision
             img.save(img_out_file)
 
             red_image_path = os.path.join(os.path.dirname(img_out_file), "red_%s" % os.path.basename(img_out_file))
