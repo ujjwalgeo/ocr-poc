@@ -103,8 +103,8 @@ class PDFDocument(object):
             if overwrite and os.path.exists(pdf_out_file):
                 os.remove(pdf_out_file)
 
+            pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
             if not os.path.exists(pdf_out_file):
-                pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
                 pdf_out = PyPDF2.PdfFileWriter()
                 pdf_out.addPage(pdf_page)
                 with open(pdf_out_file, 'wb') as pdf_of:
