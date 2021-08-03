@@ -127,20 +127,20 @@ class PDFDocument(object):
 
             img_w, img_h, has_red_pixels = create_red_image(img_out_file, red_image_path, overwrite)
 
-            text = pdf_page.extractText()
+            text = "" # pdf_page.extractText() commented for speed
             annotation = []
-            if r'/Annots' in pdf_page:
-                for annot in pdf_page['/Annots']:
-                    ann = annot.getObject()
-                    contents = ""
-                    ann_style = ""
-                    if r'/Contents' in ann:
-                        contents = ann[r'/Contents']
-                    if r'/DS' in ann:
-                        ann_style = ann[r'/DS']  # font: Helvetica,sans-serif 12.0pt; text-align:left; color:#E52237
-
-                    if len(contents) or len(ann_style):
-                        annotation.append({'content': contents, 'style': ann_style})
+            # if r'/Annots' in pdf_page:
+            #     for annot in pdf_page['/Annots']:
+            #         ann = annot.getObject()
+            #         contents = ""
+            #         ann_style = ""
+            #         if r'/Contents' in ann:
+            #             contents = ann[r'/Contents']
+            #         if r'/DS' in ann:
+            #             ann_style = ann[r'/DS']  # font: Helvetica,sans-serif 12.0pt; text-align:left; color:#E52237
+            #
+            #         if len(contents) or len(ann_style):
+            #             annotation.append({'content': contents, 'style': ann_style})
 
             extracted.append({
                 "pdf": pdf_out_file,
