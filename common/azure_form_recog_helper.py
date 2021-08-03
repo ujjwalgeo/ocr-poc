@@ -2,19 +2,19 @@ import requests
 import time
 import json
 from bson import ObjectId
-from common.config import AZURE_COGNITIVE_SERVICES_APIKEY, AZURE_COGNITIVE_SERVICES_ENDPOINT
+from common.config import AZURE_FORM_RECOGNIZER_APIKEY, AZURE_FORM_RECOGNIZER_ENDPOINT
 import os
 
 
-def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
+def run_layout_restapi(input_file, project_name, page_number, category="as-built"):
 
     if not os.path.exists(input_file):
         raise Exception("Could not access %s" % input_file)
 
-    endpoint = AZURE_COGNITIVE_SERVICES_ENDPOINT
-    subscription_key = AZURE_COGNITIVE_SERVICES_APIKEY
+    endpoint = AZURE_FORM_RECOGNIZER_ENDPOINT
+    subscription_key = AZURE_FORM_RECOGNIZER_APIKEY
 
-    url = endpoint + "/vision/v3.2/read/analyze?readingOrder=basic"
+    url = endpoint + "/formrecognizer/v2.1/layout/analyze"
     headers = {"Content-Type": "application/octet-stream", "Ocp-Apim-Subscription-Key": subscription_key}
     with open(input_file, 'rb') as f:
         data = f.read()
@@ -64,7 +64,13 @@ def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
             doc["analysis_id"] = analysis_id
             lines.append(doc)
 
-    return analysis_doc, lines
+    pageResults = obj['analyzeResult']['pageResults']
+    tables = []
+    for pageResult in pageResults:
+        if len(pageResult['tables']):
+            tables.append(pageResult['tables'])
+
+    return analysis_doc, lines, tables
 
 
 if __name__ == '__main__':
@@ -72,8 +78,11 @@ if __name__ == '__main__':
     project_name = "Test"
     page_number = 1
 
-    doc, lines = run_ocr_restapi(input_file, project_name, page_number)
+    doc, lines, tables = run_layout_restapi(input_file, project_name, page_number)
     for l in lines:
         print (l['text'])
+
+    for t in tables:
+        print(t)
 
 

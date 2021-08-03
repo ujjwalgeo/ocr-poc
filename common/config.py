@@ -16,6 +16,9 @@ AZURE_COGNITIVE_SERVICES_APIKEY = '4d41b9ddc8c346b6a7af2d1a4f7f66bd'
 
 AZURE_CUSTOM_VISION_ENDPOINT = 'https://cci-coloocr-customvision-poc-cv.cognitiveservices.azure.com'
 
+AZURE_FORM_RECOGNIZER_ENDPOINT = 'https://cci-a360scc-nonprod-form-recognizer.cognitiveservices.azure.com'
+AZURE_FORM_RECOGNIZER_APIKEY = '351af7221fe74e778c54dbb768727cde'
+
 
 ASBUILTS_COLLECTION = 'asbuilts'
 AZURE_ANALYSIS_COLLECTION = 'azure_analysis'
