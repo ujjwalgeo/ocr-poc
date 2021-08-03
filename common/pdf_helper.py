@@ -68,6 +68,8 @@ class PDFDocument(object):
         self.pages = []
 
     def extract_pages(self, pages=None):
+        from PIL import Image
+
         if pages is None:
             pages = []
 
@@ -105,11 +107,15 @@ class PDFDocument(object):
             with open(pdf_out_file, 'wb') as pdf_of:
                 pdf_out.write(pdf_of)
 
-            images = pdf2image.convert_from_path(pdf_out_file, dpi=PDF_2_IMAGE_DPI, poppler_path=POPPLER_INSTALL_PATH)
+            images = pdf2image.convert_from_path(pdf_out_file, dpi=PDF_2_IMAGE_DPI,
+                                                 strict=False, thread_count=4,
+                                                 poppler_path=POPPLER_INSTALL_PATH)
             if os.path.exists(img_out_file):
                 os.remove(img_out_file)
 
-            images[0].save(img_out_file)
+            img = images[0]
+            img = img.thumbnail((10000, 10000), Image.ANTIALIAS)
+            img.save(img_out_file)
 
             red_image_path = os.path.join(os.path.dirname(img_out_file), "red_%s" % os.path.basename(img_out_file))
             img_w, img_h, has_red_pixels = create_red_image(img_out_file, red_image_path)
