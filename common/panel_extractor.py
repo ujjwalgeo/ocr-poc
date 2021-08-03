@@ -199,9 +199,13 @@ if __name__ == '__main__':
     from common import logger
 
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
-    project_id = 'chicago_big'
-    dbname = 'chicago_big1'
+    # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+    # project_id = 'chicago_big'
+    # dbname = 'chicago_big1'
+
+    folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
+    project_id = 'new_batch_demo'
+    dbname = 'new_batch_demo'
 
     logger.setup()
     log = logger.logger

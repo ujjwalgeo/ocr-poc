@@ -14,10 +14,7 @@ def get_dbname_from_project_name(project_name):
     return db_name
 
 
-def process_folder(input_folder, project_name, db_name, num_files=None, output_folder=None):
-
-    mongo_helper = MongoHelper(dbname=db_name)
-
+def process_folder(input_folder, project_name, db_name, num_files=None, output_folder=None, overwrite=False):
     if output_folder is None:
         output_folder = os.path.join(os.path.dirname(__file__), 'asbuilts')
 
@@ -35,11 +32,12 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
     idx = 0
     n_files = len(pdf_files)
     for pdf_file in pdf_files:
+
         log.info('Extracting pages for %s (%d of %d)' % (pdf_file, idx+1, n_files))
         pdf_doc = PDFDocument(file_path=pdf_file, output_dir=output_folder)
         asbuilt_oid = ObjectId()
         try:
-            extracted = pdf_doc.extract_pages(pages)
+            extracted = pdf_doc.extract_pages(pages, overwrite=overwrite)
             asbuilt = {
                 "_id": asbuilt_oid,
                 "source_file": pdf_file,
@@ -54,6 +52,7 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
         idx += 1
 
     if len(inserted_asbuilts):
+        mongo_helper = MongoHelper(dbname=db_name)
         mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
@@ -82,9 +81,12 @@ def ocr_red_images(project_name, db_name, overwrite=True):
                         red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
                                                                      page_number=ep['page'],
                                                                      category='redline')
-                        inserted_red_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, red_ocr_doc)
-                        mongo_helper.insert_many(OCR_LINE_COLLECTION, red_ocr_lines)
-                        ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
+                        if len(red_ocr_lines):
+                            inserted_red_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, red_ocr_doc)
+                            mongo_helper.insert_many(OCR_LINE_COLLECTION, red_ocr_lines)
+                            ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
+                        else:
+                            ep['red_ocr_analysis_id'] = None
                     else:
                         ep['red_ocr_analysis_id'] = None
                     ep_dirty = True
@@ -166,6 +168,10 @@ if __name__ == '__main__':
     # project_id = 'chicago_big'
     # dbname = 'chicago_big1'
 
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
+    # project_id = 'new_batch_demo'
+    # dbname = 'new_batch_demo'
+
     folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
     project_id = 'colo_test_set'
     dbname = 'colo_test_set'
@@ -176,4 +182,3 @@ if __name__ == '__main__':
     process_folder(folder, project_id, dbname, num_files=None)
     ocr_asbuilts(project_id, dbname, True)
     ocr_red_images(project_id, dbname)
-

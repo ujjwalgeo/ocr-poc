@@ -12,7 +12,7 @@ qpdf ~/projects/cci/data/as-builts/demo/CH1362BA_21LAB_Elevation_As_Built.pdf --
 """
 
 
-def create_red_image(image_file, output_file):
+def create_red_image(image_file, output_file, overwrite=False):
     # https://stackoverflow.com/questions/30331944/finding-red-color-in-image-using-python-opencv
     img = cv2.imread(image_file)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -29,16 +29,19 @@ def create_red_image(image_file, output_file):
     out = img.copy()
     out[np.where(mask == 0)] = 0
 
-    cv2.imwrite(output_file, out)
+    if overwrite and os.path.exists(output_file):
+        os.remove(output_file)
 
-    cnt = 0
-    while True:
-        if os.path.isfile(output_file):
-            break
-        cnt += 1
-        time.sleep(.1)
-        if cnt > 100:
-            raise Exception("Error while saving red file %s" % output_file)
+    if not os.path.exists(output_file):
+        cv2.imwrite(output_file, out)
+        cnt = 0
+        while True:
+            if os.path.isfile(output_file):
+                break
+            cnt += 1
+            time.sleep(.1)
+            if cnt > 100:
+                raise Exception("Error while saving red file %s" % output_file)
 
     # return width and height here since we don't want to use opencv again later just to retrieve image dims
     width, height = img.shape[1], img.shape[2]
@@ -67,7 +70,7 @@ class PDFDocument(object):
         self.output_dir = output_dir
         self.pages = []
 
-    def extract_pages(self, pages=None):
+    def extract_pages(self, pages=None, overwrite=True):
         from PIL import Image
 
         if pages is None:
@@ -97,28 +100,32 @@ class PDFDocument(object):
             img_out_file = os.path.join(pdf_images_out_dir, img_out_name)
             pdf_out_file = os.path.join(pdf_pages_out_dir, pdf_out_name)
 
-            if os.path.exists(pdf_out_file):
+            if overwrite and os.path.exists(pdf_out_file):
                 os.remove(pdf_out_file)
 
-            pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
-            pdf_out = PyPDF2.PdfFileWriter()
-            pdf_out.addPage(pdf_page)
+            if not os.path.exists(pdf_out_file):
+                pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
+                pdf_out = PyPDF2.PdfFileWriter()
+                pdf_out.addPage(pdf_page)
+                with open(pdf_out_file, 'wb') as pdf_of:
+                    pdf_out.write(pdf_of)
 
-            with open(pdf_out_file, 'wb') as pdf_of:
-                pdf_out.write(pdf_of)
-
-            images = pdf2image.convert_from_path(pdf_out_file, dpi=PDF_2_IMAGE_DPI,
-                                                 strict=False, thread_count=4,
-                                                 poppler_path=POPPLER_INSTALL_PATH)
-            if os.path.exists(img_out_file):
+            if overwrite and os.path.exists(img_out_file):
                 os.remove(img_out_file)
 
-            img = images[0]
-            img = img.thumbnail((10000, 10000), Image.ANTIALIAS) # max image size for azure vision
-            img.save(img_out_file)
+            if not os.path.exists(img_out_file):
+                images = pdf2image.convert_from_path(pdf_out_file, dpi=PDF_2_IMAGE_DPI,
+                                                     strict=False, thread_count=4,
+                                                     poppler_path=POPPLER_INSTALL_PATH)
+                img = images[0]
+                img.thumbnail((10000, 10000), Image.ANTIALIAS) # max image size for azure vision
+                img.save(img_out_file)
 
             red_image_path = os.path.join(os.path.dirname(img_out_file), "red_%s" % os.path.basename(img_out_file))
-            img_w, img_h, has_red_pixels = create_red_image(img_out_file, red_image_path)
+            if overwrite and os.path.exists(red_image_path):
+                os.remove(red_image_path)
+
+            img_w, img_h, has_red_pixels = create_red_image(img_out_file, red_image_path, overwrite)
 
             text = pdf_page.extractText()
             annotation = []

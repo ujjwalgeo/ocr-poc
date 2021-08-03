@@ -5,7 +5,7 @@ from datetime import datetime
 logger = None
 
 
-def setup(name = None):
+def setup(name=None):
 
     global logger
 
