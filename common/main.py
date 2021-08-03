@@ -4,7 +4,7 @@ from bson import ObjectId
 from common.pdf_helper import PDFDocument
 from common.mongodb_helper import MongoHelper
 from common.azure_ocr_helper import run_ocr_restapi
-from common.config import ASBUILTS_COLLECTION, OCR_LINE_COLLECTION
+from common.config import ASBUILTS_COLLECTION, OCR_LINE_COLLECTION, AZURE_ANALYSIS_COLLECTION
 
 
 def get_dbname_from_project_name(project_name):
@@ -54,6 +54,45 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
         mongo_helper.insert_many(ASBUILTS_COLLECTION, inserted_asbuilts)
 
 
+def ocr_red_images(project_name, db_name, overwrite=True):
+    mongo_helper = MongoHelper(dbname=db_name)
+    as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
+    as_built_ids = [ab['_id'] for ab in as_builts] # save ids and get docs again in for loop to prevent cursor timeout
+    log.info('Will OCR %d as-builts' % as_builts.count())
+
+    for as_built_id in as_built_ids:
+        as_built = mongo_helper.get_document(ASBUILTS_COLLECTION, as_built_id)
+        # ocr each page for as built
+        log.info("as-built-id %s" % as_built["_id"])
+        if as_built.get('pages') is None:
+            log.info('skip  as built %s since not extracted' % as_built['_id'])
+            continue
+
+        extracted_pages = as_built['pages']
+        ep_dirty = False
+        for ep in extracted_pages:
+            if overwrite or (ep.get('red_analysis_id') is None):
+                try:
+                    # red image ocr
+                    if ep['has_red_pixels']:
+                        log.info('ocr: %s' % ep['red_image'])
+                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
+                                                                     page_number=ep['page'],
+                                                                     category='redline')
+                        inserted_red_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, red_ocr_doc)
+                        mongo_helper.insert_many(OCR_LINE_COLLECTION, red_ocr_lines)
+                        ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
+                    else:
+                        ep['red_ocr_analysis_id'] = None
+                    ep_dirty = True
+
+                except Exception as ex:
+                    log.debug("ocr error %s" % str(ex))
+
+        if ep_dirty:
+            mongo_helper.update_document(ASBUILTS_COLLECTION, as_built['_id'], {'pages': extracted_pages})
+
+
 def ocr_asbuilts(project_name, db_name, overwrite=False):
     mongo_helper = MongoHelper(dbname=db_name)
     as_builts = mongo_helper.query(ASBUILTS_COLLECTION, { 'project': project_name } )
@@ -88,7 +127,7 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
                 try:
                     ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, page_number=ep['page'],
                                                          category='as-built')
-                    inserted_analysis_id = mongo_helper.insert_one('azure_analysis', ocr_doc)
+                    inserted_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, ocr_doc)
                     mongo_helper.insert_many(OCR_LINE_COLLECTION, ocr_lines)
                     ep['ocr_analysis_id'] = ocr_doc['_id']
 
@@ -98,6 +137,9 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
                         red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
                                                                      page_number=ep['page'],
                                                                      category='redline')
+                        inserted_red_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, red_ocr_doc)
+                        mongo_helper.insert_many(OCR_LINE_COLLECTION, red_ocr_lines)
+
                         ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
                     else:
                         ep['red_ocr_analysis_id'] = None

@@ -14,7 +14,7 @@ def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
     endpoint = AZURE_COGNITIVE_SERVICES_ENDPOINT
     subscription_key = AZURE_COGNITIVE_SERVICES_APIKEY
 
-    url = endpoint + "/vision/v3.2/read/analyze"
+    url = endpoint + "/vision/v3.2/read/analyze?readingOrder=basic"
     headers = {"Content-Type": "application/octet-stream", "Ocp-Apim-Subscription-Key": subscription_key}
     with open(input_file, 'rb') as f:
         data = f.read()
@@ -65,5 +65,15 @@ def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
             lines.append(doc)
 
     return analysis_doc, lines
+
+
+if __name__ == '__main__':
+    input_file = "./asbuilts/pdf_images/CH1424BA_81LAB_Elevation_As_Built/CH1424BA_81LAB_Elevation_As_Built_page-1.png"
+    project_name = "Test"
+    page_number = 1
+
+    doc, lines = run_ocr_restapi(input_file, project_name, page_number)
+    for l in lines:
+        print (l['text'])
 
 
