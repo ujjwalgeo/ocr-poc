@@ -313,8 +313,11 @@ def identify_labels(dbname, project_id):
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id })
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
-
+    n_docs = len(asbuilt_ids)
+    idx = 0
     for doc_id in asbuilt_ids:
+        idx += 1
+        log.info('identify_labels - %s, %d of %d' % (doc_id, idx, n_docs))
         doc = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
         all_dims = doc.get('dims')
         if all_dims:
@@ -430,8 +433,12 @@ def export_output_csv(dbname, project_id):
 
         return None
 
+    n_docs = len(asbuilt_doc_ids)
+    idx = 0
     for doc_id in asbuilt_doc_ids:
+        idx += 1
         ad = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
+        log.info('export_output - %s, %d of %d' % (doc_id, idx, n_docs))
 
         if not 'site_info' in ad:
             log.info('no site info - %s' % ad['source_file'] )
@@ -689,7 +696,7 @@ if __name__ == '__main__':
     project_id = 'colo_test_set'
     dbname = 'colo_test_set'
 
-    logger.setup()
+    logger.setup('dims_standardization')
     log = logger.logger
 
     # mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)

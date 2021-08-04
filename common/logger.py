@@ -10,7 +10,7 @@ def setup(name=None):
     global logger
 
     if name is None:
-        name = __name__
+        name = str(__name__)
 
     # create file handler which logs even debug messages
     fh = logging.FileHandler('%s_%s-ocr_poc_logger.log' % (name, str(datetime.now())))
