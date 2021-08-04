@@ -346,6 +346,7 @@ def identify_labels(dbname, project_id):
                     count += 1
 
                 idx += 1
+    mongo_hlpr.close()
 
 
 def export_output_csv(dbname, project_id):
@@ -536,6 +537,7 @@ def export_output_csv(dbname, project_id):
 
 
 def _replace_words_with_errors(t):
+    t = t.upper()
     words = t.split(" ")
     replaced = []
     for w in words:
@@ -546,17 +548,14 @@ def _replace_words_with_errors(t):
     return  " ".join(replaced)
 
 
-def _get_page_dims(dbname, analysis_id, category='as-built'):
+def _get_page_dims(mongo_hlpr, analysis_id, category='as-built'):
 
-    all_dims = []
     # regx = re.compile("[0-9]+'-[0-9]+\"", re.IGNORECASE) # match with inches symbol
     regx1 = re.compile("[0-9]+'-[0-9\s\/0-9]+", re.IGNORECASE)  # separated by -
     regx2 = re.compile("[0-9]+' [0-9]+", re.IGNORECASE)  # separated by space
     regx3 = re.compile("[0-9]+-[0-9]+\"", re.IGNORECASE)  # no feet symbol, must have inch symbol separated by -
     regx4 = re.compile('[0-9]+ [0-9]+"', re.IGNORECASE)  # no feet symbol, must have inch separated by space
     regx5 = re.compile("[0-9]+'(?!')$", re.IGNORECASE)  # label followed by - and number with only feet symbol
-
-    mongo_hlpr = mongodb_helper.MongoHelper(dbname)
 
     dims = []
     for regx in [regx1, regx2, regx3, regx4, regx5]:
@@ -658,27 +657,33 @@ def match_dimensional_lines(dbname, project_id):
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
+    mongo_hlpr.close()
 
+    n_docs = len(asbuilt_ids)
+    idx = 0
     for doc_id in asbuilt_ids:
+        idx += 1
+        mongo_hlpr = mongodb_helper.MongoHelper(dbname)
         asbuilt = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
         asbuilt_pages = asbuilt.get('pages', [])
-
+        log.info('match_dimensional_lines %s, %d of %d' % (doc_id, idx, n_docs))
         all_page_dims = []
         all_redline_dims = []
 
         for asbuilt_page in asbuilt_pages:
             ocr_analysis_id = asbuilt_page.get('ocr_analysis_id')
             if ocr_analysis_id:
-                page_ocr_dims = _get_page_dims(dbname, ocr_analysis_id, category='as-built')
+                page_ocr_dims = _get_page_dims(mongo_hlpr, ocr_analysis_id, category='as-built')
                 all_page_dims.append({"page": asbuilt_page['page'], "dims": page_ocr_dims})
 
             red_analysis_id = asbuilt_page.get('red_ocr_analysis_id')
             if red_analysis_id:
-                page_redline_dims = _get_page_dims(dbname, red_analysis_id, category='redline')
+                page_redline_dims = _get_page_dims(mongo_hlpr, red_analysis_id, category='redline')
                 all_redline_dims.append({"page": asbuilt_page['page'], "dims": page_redline_dims})
 
         mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {"dims": all_page_dims})
         mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id, {"redline_dims": all_redline_dims})
+        mongo_hlpr.close()
 
 
 if __name__ == '__main__':
