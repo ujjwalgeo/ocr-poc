@@ -677,9 +677,18 @@ def match_dimensional_lines(dbname, project_id):
 if __name__ == '__main__':
     from bson import ObjectId
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    project_id = 'chicago_big'
-    dbname = 'chicago_big1'
-    category = "as-built"
+    # project_id = 'chicago_big'
+    # dbname = 'chicago_big1'
+    # category = "as-built"
+
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
+    # project_id = 'new_batch_demo'
+    # dbname = 'new_batch_demo'
+
+    folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
+    project_id = 'colo_test_set'
+    dbname = 'colo_test_set'
+
     logger.setup()
     log = logger.logger
 

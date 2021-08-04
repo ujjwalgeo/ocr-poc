@@ -1,0 +1,5 @@
+scu,jurisdiction,file,owner,latitude,longitude,address,county,pole height,pole height comment,primary power,primary power comment,secondary power,secondary power comment,fiber dist panel,fiber dist panel comment,ac load panel,ac load panel comment,street sign,street sign comment,shroud,shroud comment,antenna,antenna comment,analysis_id
+XXXX,CITY OF MIAMI GARDENS,10_8_409646_NAT_Revised_As_Built.pdf,XXXX,9999,9999,XXXX,XXXX,38.0,,,,,,,,,,,,,,43.75,,6109a437abba9c3dbd230d52
+XXXX,MIAMI-DADE COUNTY,28_3_409735_NAT_Revised_As_Built.pdf,XXXX,9999,9999,XXXX,XXXX,40.0,redline,,,,,,,,,,,,,43.67,,6109a451abba9c3dbd230d53
+XXXX,MIAMI-DADE COUNTY,3_2_SFL00310_409604_NAT_Revised_As_Built.pdf,XXXX,9999,"80' 26' 47.436"" W (-80.44651')",XXXX,XXXX,,,,,,,,,,,,,,,,,6109a49babba9c3dbd230d56
+XXXX,CITY OF HIALEAH,46_2_409801_Construction_Drawings.pdf,XXXX,9999,9999,XXXX,XXXX,40.0,,,,,,,,,,,,,,46.0,,6109a4cbabba9c3dbd230d59
