@@ -314,10 +314,10 @@ def identify_labels(dbname, project_id):
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id })
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
     n_docs = len(asbuilt_ids)
-    idx = 0
+    cnt = 0
     for doc_id in asbuilt_ids:
-        idx += 1
-        log.info('identify_labels - %s, %d of %d' % (doc_id, idx, n_docs))
+        cnt += 1
+        log.info('identify_labels - %s, %d of %d' % (doc_id, cnt, n_docs))
         doc = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
         all_dims = doc.get('dims')
         if all_dims:
