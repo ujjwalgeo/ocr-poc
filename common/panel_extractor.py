@@ -203,9 +203,13 @@ if __name__ == '__main__':
     # project_id = 'chicago_big'
     # dbname = 'chicago_big1'
 
-    folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
-    project_id = 'new_batch_demo'
-    dbname = 'new_batch_demo'
+    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
+    # project_id = 'new_batch_demo'
+    # dbname = 'new_batch_demo'
+
+    folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
+    project_id = 'colo_test_set'
+    dbname = 'colo_test_set'
 
     logger.setup()
     log = logger.logger
