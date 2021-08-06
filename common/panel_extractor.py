@@ -197,6 +197,7 @@ def process_panels(dbname, project_name):
 
 if __name__ == '__main__':
     from common import logger
+    from common.config import DBNAME, PROJECT, ASBUILTS_FOLDER
 
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
     # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
@@ -207,9 +208,13 @@ if __name__ == '__main__':
     # project_id = 'new_batch_demo'
     # dbname = 'new_batch_demo'
 
-    folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
-    project_id = 'colo_test_set'
-    dbname = 'colo_test_set'
+    folder = ASBUILTS_FOLDER
+    dbname = DBNAME
+    project_id = PROJECT
+
+    # folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
+    # project_id = 'colo_test_set'
+    # dbname = 'colo_test_set'
 
     logger.setup()
     log = logger.logger

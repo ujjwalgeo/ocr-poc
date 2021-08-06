@@ -688,6 +688,8 @@ def match_dimensional_lines(dbname, project_id):
 
 if __name__ == '__main__':
     from bson import ObjectId
+    from common.config import DBNAME, PROJECT, ASBUILTS_FOLDER
+
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
     # project_id = 'chicago_big'
     # dbname = 'chicago_big1'
@@ -697,9 +699,13 @@ if __name__ == '__main__':
     # project_id = 'new_batch_demo'
     # dbname = 'new_batch_demo'
 
-    folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
-    project_id = 'colo_test_set'
-    dbname = 'colo_test_set'
+    # folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
+    # project_id = 'colo_test_set'
+    # dbname = 'colo_test_set'
+
+    folder = ASBUILTS_FOLDER
+    project_id = PROJECT
+    dbname = DBNAME
 
     logger.setup('dims_standardization')
     log = logger.logger

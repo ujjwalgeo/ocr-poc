@@ -23,3 +23,12 @@ AZURE_FORM_RECOGNIZER_APIKEY = '351af7221fe74e778c54dbb768727cde'
 ASBUILTS_COLLECTION = 'asbuilts'
 AZURE_ANALYSIS_COLLECTION = 'azure_analysis'
 OCR_LINE_COLLECTION = 'ocr_lines'
+
+DBNAME = 'colo_test_set'
+PROJECT = 'colo_test_set'
+ASBUILTS_FOLDER = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+
+
+# DBNAME = 'new_batch_demo'
+# PROJECT = 'new_batch_demo'
+
