@@ -177,11 +177,12 @@ class Parser(object):
             near_lines_output = []
             for indx, near_line in near_lines.iterrows():
                 if near_line['line_id'] != target.ocr_line['_id']:
-                    near_lines_output.append({
-                        'line_id': near_line['line_id'],
-                        'text': near_line['text'],
-                        'page': near_line['page']
-                    })
+                    if len(near_line['text'] > 1):
+                        near_lines_output.append({
+                            'line_id': near_line['line_id'],
+                            'text': near_line['text'],
+                            'page': near_line['page']
+                        })
 
             if len(near_lines_output):
                 if target.proximity_mode == Target.SAMELINE:
