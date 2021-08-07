@@ -30,18 +30,14 @@ class Detection(object):
     def to_mongo_dict(self):
         label = self.target.label
         sameline = self.target.ocr_line['text']
-        nearlines = ""
-        value = ""
+        nearlines = "\n".join(nl['text'] for nl in self.near_lines)
+        value = nearlines
 
-        if self.target.proximity_mode == Target.SAMELINE:
-            tokens = str(sameline).split(self.target.delimiter)
-            if len(tokens) > 1:
-                label = tokens[0]
+        tokens = str(sameline).split(self.target.delimiter)
+        if len(tokens) > 1:
+            label = tokens[0]
+            if len(tokens[1]):
                 value = tokens[1]
-
-        if self.target.proximity_mode == Target.MULTILINE:
-            nearlines = "\n".join(nl['text'] for nl in self.near_lines)
-            value = nearlines
 
         return {
             "label": label,
@@ -107,6 +103,7 @@ class Parser(object):
         self.dbname = dbname
         self.mode = mode
         self.ocr_lines_gdf = None
+        self.gdf = self._load_asbuilt()
 
     def _load_asbuilt(self):
         mongo_helper = MongoHelper(self.dbname)
@@ -114,11 +111,22 @@ class Parser(object):
             as_built_doc = mongo_helper.get_document(ASBUILTS_COLLECTION, self.asbuilt_id)
             self.asbuilt_doc = as_built_doc
             analysis_ids = []
+            pages = as_built_doc.get('pages')
+            if pages is None:
+                raise Exception('asbuilt %s, %s has no pages' % (self.asbuilt_id, self.asbuilt_doc['source_file']))
+
             for page in as_built_doc['pages']:
                 if self.mode == 'asbuilt':
-                    analysis_id = page['ocr_analysis_id']
+                    analysis_id = page.get('ocr_analysis_id', None)
+                    if analysis_id is None:
+                        log.debug('No OCR Analysis: asbuilt %s, page %d' % (self.asbuilt_id, page['page']))
+                        continue
+
                 elif self.mode == 'redline':
-                    analysis_id = page['red_ocr_analysis_id']
+                    analysis_id = page.get('red_ocr_analysis_id', None)
+                    if analysis_id is None:
+                        log.debug('No RED OCR Analysis: asbuilt %s, page %d' % (self.asbuilt_id, page['page']))
+                        continue
                 else:
                     raise Exception('mode should be asbuilt or redline')
                 analysis_ids.append(analysis_id)
@@ -159,8 +167,11 @@ class Parser(object):
             except TargetNotFoundException:
                 pass
 
-        gdf = self._load_asbuilt()
         detections = []
+
+        # order targets by priority so that highest priority overrides
+        sorted(matched_targets, key=lambda x: x.priority, reverse=True)
+
         for target in matched_targets:
             label_text = target.ocr_line['text']
             target_geom = poly_from_bbox(target.ocr_line['boundingBox'])
@@ -171,13 +182,14 @@ class Parser(object):
 
             target_geom = scale(target_geom, xfact=target.xfact, yfact=target.yfact, origin=scale_origin)
 
+            gdf = self.gdf
             gdf = gdf[gdf['page'] == target.ocr_line['page']].copy()
             near_mask = gdf['geom'].apply(lambda x: x.intersects(target_geom))
             near_lines = gdf[near_mask]
             near_lines_output = []
             for indx, near_line in near_lines.iterrows():
                 if near_line['line_id'] != target.ocr_line['_id']:
-                    if len(near_line['text'] > 1):
+                    if len(near_line['text']) > 1:
                         near_lines_output.append({
                             'line_id': near_line['line_id'],
                             'text': near_line['text'],
@@ -185,10 +197,7 @@ class Parser(object):
                         })
 
             if len(near_lines_output):
-                if target.proximity_mode == Target.SAMELINE:
-                    detection = Detection(target, near_lines_output[0])
-                else:
-                    detection = Detection(target, near_lines_output)
+                detection = Detection(target, near_lines_output)
                 detections.append(detection)
 
         return detections
@@ -236,13 +245,18 @@ def parse_asbuilt(dbname, parser_file, asbuilt_id, container_field, mode='asbuil
     for entity in entity_targets:
         entity_target = entity_targets[entity]
         try:
-            detections = parser.parse(entity_target['targets'])
-            mongo_helper = MongoHelper(dbname)
-            detections_mongo = [ d.to_mongo_dict() for d in detections ]
-            mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id,
-                            {"%s.%s.%s" % (container_field, entity_target['collection'], entity): detections_mongo })
-            mongo_helper.close()
+            targets = entity_target.get('targets', None)
+            if targets:
+                detections = parser.parse(targets)
+                mongo_helper = MongoHelper(dbname)
+                detections_mongo = [ d.to_mongo_dict() for d in detections ]
+                mongo_helper.update_document(ASBUILTS_COLLECTION, asbuilt_id,
+                                { "%s.%s.%s" % (container_field, entity_target['collection'], entity): detections_mongo })
+                mongo_helper.close()
+            else:
+                log.debug('Entity %s had no matched targets' % entity)
         except Exception as ex:
+            # raise ex
             log.debug(str(ex))
 
 
@@ -261,8 +275,11 @@ if __name__ == "__main__":
     asbuilts_cursor = mongo_helper.query(ASBUILTS_COLLECTION, {"project": project})
     asbuilt_ids = [ ab["_id"] for ab in asbuilts_cursor ]
     mongo_helper.close()
+
+    # asbuilt_ids = [ '6109a413abba9c3dbd230d51' ]
     count = len(asbuilt_ids)
     idx = 0
+
     for asbuilt_id in asbuilt_ids:
         idx += 1
         log.info('processing %s - %d of %d' % (asbuilt_id, idx, count))

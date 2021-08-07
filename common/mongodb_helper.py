@@ -29,10 +29,12 @@ class MongoHelper(object):
     def get_document(self, coll_name, id):
         if isinstance(id, str):
             id = ObjectId(id)
-
         query = {"_id": id}
         coll = self.db[coll_name]
-        return coll.find_one(query)
+        doc = coll.find_one(query)
+        if doc is None:
+            raise Exception("Collection %s has no document for id %s" % (coll_name, id))
+        return doc
 
     def update_document(self, coll_name, id, values):
         if isinstance(id, str):
