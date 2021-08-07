@@ -207,6 +207,7 @@ core_entities = [
     "AC LOAD PANEL",
     "OVERHEAD CATV",
     "TELCO CONNECTION",
+    "RADIO LTE"
 ]
 
 known_labels = [
@@ -450,6 +451,7 @@ def export_output_csv(dbname, project_id):
             continue
 
         kvps = ad['site_info']['kvps']
+
         scu = kvps.get('SCU:', 'XXXX')
         jurisdiction = kvps.get('JURISDICTION:', 'XXXX')
         owner = kvps.get('UTILITIES:', 'XXXX')
@@ -646,7 +648,7 @@ def _get_page_dims(mongo_hlpr, analysis_id, category='as-built'):
                 "value": value,
                 "feet": dim_feet,
                 "inches": dim_inches,
-                "line": line,
+                "line": {"_id": line["_id"], "text": line["text"]},
                 "analysis_category": category
             })
 
@@ -688,7 +690,7 @@ def match_dimensional_lines(dbname, project_id):
 
 if __name__ == '__main__':
     from bson import ObjectId
-    from common.config import DBNAME, PROJECT, ASBUILTS_FOLDER
+    from common.config import DBNAME, PROJECT
 
     # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
     # project_id = 'chicago_big'
@@ -703,7 +705,6 @@ if __name__ == '__main__':
     # project_id = 'colo_test_set'
     # dbname = 'colo_test_set'
 
-    folder = ASBUILTS_FOLDER
     project_id = PROJECT
     dbname = DBNAME
 

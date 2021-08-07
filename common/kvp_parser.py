@@ -48,7 +48,8 @@ class Detection(object):
                 "label": self.target.label,
                 "proximity_mode": self.target.proximity_mode,
                 "match_type": self.target.match_type,
-                "page": self.target.page
+                "page": self.target.page,
+                "line_id": self.target.ocr_line["_id"]
             }
         }
 
@@ -86,9 +87,11 @@ class Target(object):
         self.priority = priority
         self.delimiter = delimiter
 
-    def load_target_line(self, mongo_helper):
+    def load_target_line(self, mongo_helper, analysis_ids):
         target_regx = re.compile(self.label, re.IGNORECASE)  # regex to look for exact label
-        target_ocr_lines_cursor = mongo_helper.query(OCR_LINE_COLLECTION, {'text': target_regx})
+        target_ocr_lines_cursor = mongo_helper.query(OCR_LINE_COLLECTION, {'text': target_regx,
+                                                                           'analysis_id': {'$in': analysis_ids}
+                                                    })
         target_ocr_lines = [d for d in target_ocr_lines_cursor]
         if len(target_ocr_lines) == 0:
             raise TargetNotFoundException('Could not find target text %s' % self.label)
@@ -103,6 +106,8 @@ class Parser(object):
         self.dbname = dbname
         self.mode = mode
         self.ocr_lines_gdf = None
+        self.analysis_ids = []
+
         self.gdf = self._load_asbuilt()
 
     def _load_asbuilt(self):
@@ -136,14 +141,19 @@ class Parser(object):
             geom = []
             line_id = []
             page = []
+            anal_ids = []
             for ol in ocr_lines_cursor:
                 text.append(ol['text'])
                 page.append(ol['page'])
                 geom.append(poly_from_bbox(ol['boundingBox']))
+                anal_ids.append(ol['analysis_id'])
                 line_id.append(ol['_id'])
 
             df = pandas.DataFrame(data={'line_id': line_id, 'text': text, 'page': page, 'geom': geom})
             ocr_lines_gdf = geopandas.GeoDataFrame(df, geometry='geom')
+            ocr_lines_gdf_analysis_ids = list(set(anal_ids))
+            self.analysis_ids = ocr_lines_gdf_analysis_ids
+            log.debug('GDF analysis ids: %s' % ",".join(str(o) for o in ocr_lines_gdf_analysis_ids))
         except Exception as ex:
             mongo_helper.close()
             raise ex
@@ -161,7 +171,7 @@ class Parser(object):
         for target in targets:
             assert (isinstance(target, Target))
             try:
-                ocr_line = target.load_target_line(mongo_helper)
+                ocr_line = target.load_target_line(mongo_helper, self.analysis_ids)
                 target.ocr_line = ocr_line
                 matched_targets.append(target)
             except TargetNotFoundException:
@@ -276,7 +286,7 @@ if __name__ == "__main__":
     asbuilt_ids = [ ab["_id"] for ab in asbuilts_cursor ]
     mongo_helper.close()
 
-    # asbuilt_ids = [ '6109a413abba9c3dbd230d51' ]
+    # asbuilt_ids = [ ObjectId("6109a413abba9c3dbd230d51") ]
     count = len(asbuilt_ids)
     idx = 0
 
@@ -285,5 +295,3 @@ if __name__ == "__main__":
         log.info('processing %s - %d of %d' % (asbuilt_id, idx, count))
         parse_asbuilt(dbname, './kvp_parser_targets.json', asbuilt_id, "kvp_parser", 'asbuilt')
         parse_asbuilt(dbname, './kvp_parser_targets.json', asbuilt_id, "kvp_parser_redline", 'redline')
-
-

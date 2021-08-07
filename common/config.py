@@ -24,11 +24,11 @@ ASBUILTS_COLLECTION = 'asbuilts'
 AZURE_ANALYSIS_COLLECTION = 'azure_analysis'
 OCR_LINE_COLLECTION = 'ocr_lines'
 
-# DBNAME = 'colo_test_set'
-# PROJECT = 'colo_test_set'
-# ASBUILTS_FOLDER = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
+DBNAME = 'colo_test_set'
+PROJECT = 'colo_test_set'
+ASBUILTS_FOLDER = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
 
 
-DBNAME = 'new_batch_demo'
-PROJECT = 'new_batch_demo'
-
+# DBNAME = 'new_batch_demo'
+# PROJECT = 'new_batch_demo'
+# ASBUILTS_FOLDER = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
