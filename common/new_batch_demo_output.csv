@@ -1,10 +1,30 @@
 scu,jurisdiction,file,owner,latitude,longitude,address,county,pole height,pole height comment,primary power,primary power comment,secondary power,secondary power comment,fiber dist panel,fiber dist panel comment,ac load panel,ac load panel comment,street sign,street sign comment,shroud,shroud comment,antenna,antenna comment,analysis_id
-XXXX,XXXX,0085-BP-LV9A_as_built.pdf,XXXX,9999,9999,XXXX,XXXX,43.08,redline,,,,,,,,,,,,,46.92,,6109a413abba9c3dbd230d51
-XXXX,CITY OF MIAMI GARDENS,10_8_409646_NAT_Revised_As_Built.pdf,XXXX,9999,9999,XXXX,XXXX,38.0,,,,,,,,,,,,,,43.75,,6109a437abba9c3dbd230d52
-XXXX,MIAMI-DADE COUNTY,28_3_409735_NAT_Revised_As_Built.pdf,XXXX,9999,9999,XXXX,XXXX,40.0,redline,,,,,,,,,,,,,43.67,,6109a451abba9c3dbd230d53
-XXXX,XXXX,353677_VMB3_424030_As_Builts_102519.pdf,XXXX,9999,9999,XXXX,XXXX,,,,,,,,,,,,,,,,,6109a46fabba9c3dbd230d54
-XXXX,XXXX,391918_VZ_PVE01m1_409049_As_Built_CD.pdf,XXXX,9999,9999,XXXX,XXXX,,,,,,,,,,,,,,,,,6109a482abba9c3dbd230d55
-XXXX,MIAMI-DADE COUNTY,3_2_SFL00310_409604_NAT_Revised_As_Built.pdf,XXXX,9999,"80' 26' 47.436"" W (-80.44651')",XXXX,XXXX,,,,,,,,,,,,,,,,,6109a49babba9c3dbd230d56
-XXXX,XXXX,402028_PHP226_NAT_Redlined_As-Built.pdf,XXXX,9999,9999,XXXX,XXXX,33.83,,,,,,,,,,,,,,53.75,,6109a4baabba9c3dbd230d57
-XXXX,CITY OF HIALEAH,46_2_409801_Construction_Drawings.pdf,XXXX,9999,9999,XXXX,XXXX,40.0,,,,,,,,,,,,,,46.0,,6109a4cbabba9c3dbd230d59
-XXXX,XXXX,49_5_409820_Construction_Drawings.pdf,XXXX,9999,9999,XXXX,XXXX,,,,,,,,,,,,,,,,,6109a4e4abba9c3dbd230d5a
+920884,,0085-BP-LV9A_as_built.pdf,,38.2451835º, - 85.7434691º, 681 S. HANCOCK ST.,,43.08,redline,,,,,,,,,,,,,46.92,,6109a413abba9c3dbd230d51
+,CITY OF MIAMI GARDENS,10_8_409646_NAT_Revised_As_Built.pdf,,"25.938580'
+IMPORTANCE FACTOR= 1.0
+-80.210910
+- NATIONAL ELECTRICAL CODE, 2014 EDITION (NFPA 70-2014)
+- FLORIDA FIRE PREVENTION CODE 6th EDITION","25.938580'
+-80.210910","USA ENG PROJECT NO .: INTEROFFICE
+DRAWN BY
+CHECKED BY:",,38.0,,,,,,,,,,,,,,43.75,,6109a437abba9c3dbd230d52
+,MIAMI-DADE COUNTY,28_3_409735_NAT_Revised_As_Built.pdf,,"26.68790'
+IMPORTANCE FACTOR= 1.0
+SW Bath St.
+-80.34145'
+- NATIONAL ELECTRICAL CODE, 2014 EDITION
+- FLORIDA FIRE PREVENTION CODE 6th EDITION (2017)","26.68790'
+SW Bath St.
+-80.34145'",,,40.0,redline,,,,,,,,,,,,,43.67,,6109a451abba9c3dbd230d53
+,,353677_VMB3_424030_As_Builts_102519.pdf,,,,"DIGALERT
+1-800-227-2600",,,,,,,,,,,,,,,,,,6109a46fabba9c3dbd230d54
+,,391918_VZ_PVE01m1_409049_As_Built_CD.pdf,,,,,,,,,,,,,,,,,,,,,,6109a482abba9c3dbd230d55
+,MIAMI-DADE COUNTY,3_2_SFL00310_409604_NAT_Revised_As_Built.pdf,,"25' 42' 0.216"" N (25.70006')","80' 26' 47.436"" W (-80.44651')",,,,,,,,,,,,,,,,,,,6109a49babba9c3dbd230d56
+,,402028_PHP226_NAT_Redlined_As-Built.pdf,, 39.97788ºN, 75.25062ºW,,,33.83,,,,,,,,,,,,,,53.75,,6109a4baabba9c3dbd230d57
+,CITY OF HIALEAH,46_2_409801_Construction_Drawings.pdf,,"IMPORTANCE FACTOR= 1.0
+25.876953'
+-80.307989'
+- NATIONAL ELECTRICAL CODE, 2014 EDITION (NFPA 70-2014)
+- FLORIDA FIRE PREVENTION CODE 6th EDITION (2017)","25.876953'
+-80.307989'",,,40.0,,,,,,,,,,,,,,46.0,,6109a4cbabba9c3dbd230d59
+,,49_5_409820_Construction_Drawings.pdf,,,,,,,,,,,,,,,,,,,,,,6109a4e4abba9c3dbd230d5a

@@ -28,7 +28,6 @@ DBNAME = 'colo_test_set'
 PROJECT = 'colo_test_set'
 ASBUILTS_FOLDER = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
 
-
 # DBNAME = 'new_batch_demo'
 # PROJECT = 'new_batch_demo'
 # ASBUILTS_FOLDER = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
