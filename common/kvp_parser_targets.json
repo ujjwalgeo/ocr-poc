@@ -1,5 +1,23 @@
 [
   {
+    "entity": "site_coordinates",
+    "collection": "site_info",
+    "targets": [
+      {
+        "label": "site coordinates:",
+        "match": "exact",
+        "case_sensitive": false,
+        "mode": "multiline",
+        "scale_x": 2,
+        "scale_y": 2,
+        "scale_origin": "top-left",
+        "delimiter": ":",
+        "page": 1,
+        "priority": 1
+      }
+    ]
+  },
+  {
     "entity": "latitude",
     "collection": "site_info",
     "targets": [
@@ -50,23 +68,10 @@
         "delimiter": ":",
         "page": 1,
         "priority": 4
-      },
-      {
-        "label": "site coordinates:",
-        "match": "exact",
-        "case_sensitive": false,
-        "mode": "multiline",
-        "scale_x": 2,
-        "scale_y": 2,
-        "scale_origin": "top-left",
-        "delimiter": ":",
-        "page": 1,
-        "priority": 5
       }
     ]
   },
-
-    {
+  {
     "entity": "longitude",
     "collection": "site_info",
     "targets": [
@@ -117,18 +122,6 @@
         "delimiter": ":",
         "page": 4,
         "priority": 4
-      },
-      {
-        "label": "site coordinates:",
-        "match": "exact",
-        "case_sensitive": false,
-        "mode": "multiline",
-        "scale_x": 2,
-        "scale_y": 2,
-        "scale_origin": "top-left",
-        "delimiter": ":",
-        "page": 1,
-        "priority": 5
       }
     ]
   },
@@ -137,19 +130,19 @@
     "collection": "site_info",
     "targets": [
       {
-        "label": "address:",
+        "label": "node placement",
         "match": "exact",
         "case_sensitive": false,
-        "mode": "sameline",
-        "scale_x": 5,
-        "scale_y": 1,
+        "mode": "multiline",
+        "scale_x": 2,
+        "scale_y": 2,
         "scale_origin": "top-left",
         "delimiter": ":",
         "page": 1,
         "priority": 1
       },
       {
-        "label": "near address:",
+        "label": "address:",
         "match": "exact",
         "case_sensitive": false,
         "mode": "sameline",
@@ -161,6 +154,18 @@
         "priority": 2
       },
       {
+        "label": "near address:",
+        "match": "exact",
+        "case_sensitive": false,
+        "mode": "sameline",
+        "scale_x": 5,
+        "scale_y": 1,
+        "scale_origin": "top-left",
+        "delimiter": ":",
+        "page": 1,
+        "priority": 3
+      },
+      {
         "label": "site address:",
         "match": "exact",
         "case_sensitive": false,
@@ -170,7 +175,7 @@
         "scale_origin": "top-left",
         "delimiter": ":",
         "page": 1,
-        "priority": 3
+        "priority": 4
       }
     ]
   },
@@ -192,7 +197,6 @@
       }
     ]
   },
-
   {
     "entity": "scu",
     "collection": "site_info",
@@ -234,6 +238,23 @@
         "priority": 3
       }
     ]
+  },
+  {
+    "entity": "jurisdiction",
+    "collection": "site_info",
+    "targets": [
+      {
+        "label": "jurisdiction:",
+        "match": "exact",
+        "case_sensitive": false,
+        "mode": "sameline",
+        "scale_x": 2,
+        "scale_y": 1,
+        "scale_origin": "top-left",
+        "delimiter": ":",
+        "page": 1,
+        "priority": 1
+      }
+    ]
   }
-
 ]

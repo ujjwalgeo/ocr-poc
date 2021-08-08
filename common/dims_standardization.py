@@ -456,6 +456,7 @@ def export_output_csv(dbname, project_id):
         jurisdiction = None
         owner = None
         county = None
+        jurisdiction = None
 
         # first look in kvp_parser
         if ad.get('kvp_parser'):
@@ -463,22 +464,12 @@ def export_output_csv(dbname, project_id):
             if kvp_parser.get('site_info'):
                 si = kvp_parser['site_info']
                 scu = extract_from_kvp_parser_object(si, 'scu')
-                # jurisdiction = kvps.get('JURISDICTION:', 'XXXX')
+                jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction')
                 # owner = kvps.get('UTILITIES:', 'XXXX')
                 latitude = extract_from_kvp_parser_object(si, 'latitude')
                 longitude = extract_from_kvp_parser_object(si, 'longitude')
                 address = extract_from_kvp_parser_object(si, 'address')
                 # county = kvps.get('COUNTY', 'XXXX')
-
-        # look in kvp_redline_parser
-        if ad.get('kvp_parser_redline'):
-            kvp_parser = ad['kvp_parser_redline']
-            if kvp_parser.get('site_info'):
-                si = kvp_parser['site_info']
-                scu = extract_from_kvp_parser_object(si, 'scu', scu)
-                latitude = extract_from_kvp_parser_object(si, 'latitude', latitude)
-                longitude = extract_from_kvp_parser_object(si, 'longitude', longitude)
-                address = extract_from_kvp_parser_object(si, 'address', address)
 
         # if not 'site_info' in ad:
         #     log.info('no site info - %s' % ad['source_file'])
@@ -498,6 +489,17 @@ def export_output_csv(dbname, project_id):
                 longitude = kvps.get('LONGITUDE:', longitude)
                 address = kvps.get('SITE ADDRESS:', address)
                 county = kvps.get('COUNTY', None)
+
+                # look in kvp_redline_parser
+                if ad.get('kvp_parser_redline'):
+                    kvp_parser = ad['kvp_parser_redline']
+                    if kvp_parser.get('site_info'):
+                        si = kvp_parser['site_info']
+                        scu = extract_from_kvp_parser_object(si, 'scu', scu)
+                        latitude = extract_from_kvp_parser_object(si, 'latitude', latitude)
+                        longitude = extract_from_kvp_parser_object(si, 'longitude', longitude)
+                        address = extract_from_kvp_parser_object(si, 'address', address)
+                        jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction', jurisdiction)
 
         file = os.path.basename(ad['source_file'])
 
