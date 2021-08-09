@@ -32,7 +32,7 @@ def match_common_files():
 
 def compare_output():
     test_file = 'OCR_100SiteTest.csv'
-    output_file = 'colo_test_set_output.csv'
+    output_file = 'colo_test.csv'
 
     test_df = pd.read_csv(test_file)
     output_df = pd.read_csv(output_file)
@@ -53,7 +53,6 @@ def compare_output():
     join_df = test_df.merge(output_df, on='file')
     join_df["status"] = join_df.apply(lambda x: x['pole height'] == x['Pole Height - AGL'], axis=1)
     join_df.to_csv('./merged.csv', index=False)
-
 
 
 # match_common_files()

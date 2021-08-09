@@ -201,6 +201,7 @@ core_entities = [
     "ELECTRIC BOX",
     "NEUTRAL ELECTRICAL SERVICE",
     "SECONDARY SERVICE",
+    "SECONDARY POWER",
     "FIBER DIST PANEL",
     "STREET SIGN",
     "AC LOAD PANEL",
@@ -523,6 +524,10 @@ def export_output_csv(dbname, project_id):
 
         secondary_power = search_dims(ad, 'SECONDARY SERVICE', pages=pages)
         secondary_power_comment = ""
+
+        if secondary_power is None:
+            secondary_power = search_dims(ad, 'SECONDARY POWER', pages=pages)
+            secondary_power_comment = ""
 
         fiber_dist = search_dims(ad, 'FIBER DIST PANEL', pages=pages)
         fiber_dist_comment = ""
