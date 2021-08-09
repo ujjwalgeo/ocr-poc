@@ -409,6 +409,7 @@ def export_output_csv(dbname, project_id):
         return None
 
     def search_dims(doc, entity, pages, position=None):
+        value = None
         try:
             for page in pages:
                 all_dims = doc['dims']
@@ -429,18 +430,18 @@ def export_output_csv(dbname, project_id):
                     else:
                         pass
                 if len(found_dims) == 1:
-                    return np.around((found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12), 2)
+                    value = np.around((found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12), 2)
 
                 if len(found_dims) > 1:
                     # if entity == 'fiber dist panel':
                     #     print(entity)
-                    return np.around(0.5 * (
+                    value = np.around(0.5 * (
                             (float(found_dims[0]['feet']) + float(found_dims[0]['inches']) / 12) +
                             (float(found_dims[1]['feet']) + float(found_dims[1]['inches']) / 12)), 2)
         except Exception as ex:
             log.info(str(ex))
 
-        return None
+        return value
 
     def extract_from_kvp_parser_object(obj, property, prev_value=None):
         items = obj.get(property, None)
