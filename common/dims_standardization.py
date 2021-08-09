@@ -684,14 +684,15 @@ def _get_page_dims(mongo_hlpr, analysis_id, category='as-built'):
                         log.info("Error parsing dimensions for %s" % t)
                         log.info(str(ex))
 
-            dims.append({
-                "label": label,
-                "value": value,
-                "feet": dim_feet,
-                "inches": dim_inches,
-                "line": {"_id": line["_id"], "text": line["text"]},
-                "analysis_category": category
-            })
+            if len(label) > 1:
+                dims.append({
+                    "label": label,
+                    "value": value,
+                    "feet": dim_feet,
+                    "inches": dim_inches,
+                    "line": {"_id": line["_id"], "text": line["text"]},
+                    "analysis_category": category
+                })
 
     return dims
 
