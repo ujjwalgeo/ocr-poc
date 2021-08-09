@@ -384,7 +384,8 @@ def export_output_csv(dbname, project_id):
         'analysis_id': []
     }
 
-    def search_redline_dims(doc, entity, pages):
+    def search_redline_dims(doc, entity, pages, position=None):
+        value = None
         try:
             for page in pages:
                 redline_dims = doc['redline_dims']
@@ -392,21 +393,29 @@ def export_output_csv(dbname, project_id):
                     page_dims = redline_dims[page-1]['dims']
                     entity = entity.lower()
                     found_dims = []
+                    if position:
+                        position = position.lower()
+
                     for dim in page_dims:
-                        if (dim['entity']).lower() == entity:
+                        if position:
+                            if ((dim['entity']).lower() == entity) and (position == dim['position'].lower()):
+                                found_dims.append(dim)
+                        elif (dim['entity']).lower() == entity:
                             found_dims.append(dim)
+                        else:
+                            pass
 
                     if len(found_dims) == 1:
-                        return np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
+                        value = np.around((found_dims[0]['feet'] + found_dims[0]['inches'] / 12), 2)
 
                     if len(found_dims) > 1:
-                        return np.around(0.5 * (
+                        value = np.around(0.5 * (
                                 (found_dims[0]['feet'] + found_dims[0]['inches'] / 12) +
                                 (found_dims[1]['feet'] + found_dims[1]['inches'] / 12)), 2)
         except Exception as ex:
             log.info(str(ex))
 
-        return None
+        return value
 
     def search_dims(doc, entity, pages, position=None):
         value = None
