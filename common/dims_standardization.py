@@ -195,7 +195,6 @@ core_entities = [
     "GRADE REFERENCE",
     "ANTENNA",
     "SHROUD",
-    "PROPOSED POLE",
     "POLE",
     "PRIMARY ELECTRICAL",
     "NEUTRAL ELECTRICAL",
@@ -210,35 +209,35 @@ core_entities = [
     "RADIO LTE"
 ]
 
-known_labels = [
-    "COMM CONNECTION",
-    "GRADE REFERENCE",
-    "ANTENNA",
-    "ANTEMNA",
-    "PROPOSED ANTENNA",
-    "TOP OF ANTENNA",
-    "SHROUD",
-    "TOP OF PROPOSED SHROUD",
-    "TOP OF PROPOSED POLE",
-    "TOP OF POLE",
-    "PRIMARY ELECTRICAL LINE",
-    "NEUTRAL ELECTRICAL LINE",
-    "NEUTRAL ELECTRICAL SERVICE LINE",
-    "ELECTRIC BOX",
-    "SECONDARY SERVICE LINE",
-    "TOP OF FIBER DIST PANEL",
-    "BOTTOM OF FIBER DIST PANEL",
-    "CITY STREET SIGN",
-    "STREET SIGN",
-    "GUY WIRE CONNECTION",
-    "STREET LIGHT",
-    "AC LOAD PANEL",
-    "OVERHEAD CATV",
-    "BURIED  BELOW GRADE  TIED TOGETHER",
-    "MAX",
-    "TELCO CONNECTION",
-    "TOP OF NID",
-]
+# known_labels = [
+#     "COMM CONNECTION",
+#     "GRADE REFERENCE",
+#     "ANTENNA",
+#     "ANTEMNA",
+#     "PROPOSED ANTENNA",
+#     "TOP OF ANTENNA",
+#     "SHROUD",
+#     "TOP OF PROPOSED SHROUD",
+#     "TOP OF PROPOSED POLE",
+#     "TOP OF POLE",
+#     "PRIMARY ELECTRICAL LINE",
+#     "NEUTRAL ELECTRICAL LINE",
+#     "NEUTRAL ELECTRICAL SERVICE LINE",
+#     "ELECTRIC BOX",
+#     "SECONDARY SERVICE LINE",
+#     "TOP OF FIBER DIST PANEL",
+#     "BOTTOM OF FIBER DIST PANEL",
+#     "CITY STREET SIGN",
+#     "STREET SIGN",
+#     "GUY WIRE CONNECTION",
+#     "STREET LIGHT",
+#     "AC LOAD PANEL",
+#     "OVERHEAD CATV",
+#     "BURIED  BELOW GRADE  TIED TOGETHER",
+#     "MAX",
+#     "TELCO CONNECTION",
+#     "TOP OF NID",
+# ]
 
 
 def get_jaccard_sim(str1, str2):
@@ -408,7 +407,7 @@ def export_output_csv(dbname, project_id):
 
         return None
 
-    def search_dims(doc, entity, pages):
+    def search_dims(doc, entity, pages, position=None):
         try:
             for page in pages:
                 all_dims = doc['dims']
@@ -417,10 +416,17 @@ def export_output_csv(dbname, project_id):
                 page_dims = all_dims[page-1]['dims']
                 entity = entity.lower()
                 found_dims = []
-                for dim in page_dims:
-                    if (dim['entity']).lower() == entity:
-                        found_dims.append(dim)
+                if position:
+                    position = position.lower()
 
+                for dim in page_dims:
+                    if position:
+                        if ((dim['entity']).lower() == entity) and (position == dim['position'].lower()):
+                            found_dims.append(dim)
+                    elif (dim['entity']).lower() == entity:
+                        found_dims.append(dim)
+                    else:
+                        pass
                 if len(found_dims) == 1:
                     return np.around((found_dims[0]['feet'] + float(found_dims[0]['inches']) / 12), 2)
 
@@ -503,35 +509,34 @@ def export_output_csv(dbname, project_id):
 
         file = os.path.basename(ad['source_file'])
 
-        pole_height = search_dims(ad, "POLE", pages=[3, 2, 4, 1])
-        pole_height_comment = ""
-        if pole_height is None:
-            pole_height = search_dims(ad, "PROPOSED POLE", pages=[3, 2, 4, 1])
+        pages = [1, 2, 3, 4]
+        pole_height = search_dims(ad, "POLE", pages=pages, position='TOP')
+        pole_height_comment = "as-built"
 
-        redline_pole_height = search_redline_dims(ad, 'POLE', pages=[3, 2, 1])
+        redline_pole_height = search_redline_dims(ad, 'POLE', pages=pages)
         if redline_pole_height:
             pole_height = redline_pole_height
             pole_height_comment = 'redline'
 
-        primary_power = search_dims(ad, 'PRIMARY ELECTRICAL', pages=[3, 2, 4, 1])
+        primary_power = search_dims(ad, 'PRIMARY ELECTRICAL', pages=pages)
         primary_power_comment = ""
 
-        secondary_power = search_dims(ad, 'SECONDARY SERVICE', pages=[3, 2, 4, 1])
+        secondary_power = search_dims(ad, 'SECONDARY SERVICE', pages=pages)
         secondary_power_comment = ""
 
-        fiber_dist = search_dims(ad, 'FIBER DIST PANEL', pages=[3, 2, 4, 1])
+        fiber_dist = search_dims(ad, 'FIBER DIST PANEL', pages=pages)
         fiber_dist_comment = ""
 
-        ac_load = search_dims(ad, 'AC LOAD PANEL', pages=[3, 2, 4, 1])
+        ac_load = search_dims(ad, 'AC LOAD PANEL', pages=pages)
         ac_load_comment = ""
 
-        sign = search_dims(ad, 'STREET SIGN', pages=[3, 2, 4, 1])
+        sign = search_dims(ad, 'STREET SIGN', pages=pages)
         sign_comment = ""
 
-        shroud = search_dims(ad, 'SHROUD', pages=[3, 2, 4, 1])
+        shroud = search_dims(ad, 'SHROUD', pages=pages)
         shroud_comment = ""
 
-        antenna = search_dims(ad, 'ANTENNA', pages=[3, 2, 4, 1])
+        antenna = search_dims(ad, 'ANTENNA', pages=pages)
         antenna_comment = ""
 
         data['scu'].append(scu)
