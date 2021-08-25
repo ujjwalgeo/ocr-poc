@@ -132,7 +132,7 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
             if overwrite or (ep.get('ocr_analysis_id') is None):
                 log.info('ocr: %s' % ep['image'])
                 try:
-                    ocr_doc, ocr_lines = run_ocr_restapi(ep['image'], project_name, page_number=ep['page'],
+                    ocr_doc, ocr_lines = run_ocr_restapi(as_built_id, ep['image'], project_name, page_number=ep['page'],
                                                          category='as-built')
                     inserted_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, ocr_doc)
                     mongo_helper.insert_many(OCR_LINE_COLLECTION, ocr_lines)
@@ -141,12 +141,11 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
                     # red image ocr
                     if ep['has_red_pixels']:
                         log.info('ocr: %s' % ep['red_image'])
-                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
+                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(as_built_id, ep['red_image'], project_name,
                                                                      page_number=ep['page'],
                                                                      category='redline')
                         inserted_red_analysis_id = mongo_helper.insert_one(AZURE_ANALYSIS_COLLECTION, red_ocr_doc)
                         mongo_helper.insert_many(OCR_LINE_COLLECTION, red_ocr_lines)
-
                         ep['red_ocr_analysis_id'] = red_ocr_doc['_id']
                     else:
                         ep['red_ocr_analysis_id'] = None

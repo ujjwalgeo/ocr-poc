@@ -6,7 +6,7 @@ from common.config import AZURE_COGNITIVE_SERVICES_APIKEY, AZURE_COGNITIVE_SERVI
 import os
 
 
-def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
+def run_ocr_restapi(asbuilt_id, input_file, project_name, page_number, category="as-built"):
 
     if not os.path.exists(input_file):
         raise Exception("Could not access %s" % input_file)
@@ -40,7 +40,9 @@ def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
         "source_file": input_file,
         "project_id": project_name,
         "category": category,
-        "analysis": obj
+        "analysis": obj,
+        "asbuilt_id": asbuilt_id,
+        "page": page_number
     }
 
     readResults = obj['analyzeResult']['readResults']
@@ -60,8 +62,9 @@ def run_ocr_restapi(input_file, project_name, page_number, category="as-built"):
             doc["width"] = width
             doc["height"] = height
             doc["unit"] = unit
-            doc["read_result_id"] = readResultCount
+            # doc["read_result_id"] = readResultCount
             doc["analysis_id"] = analysis_id
+            doc['asbuilt_id'] = asbuilt_id
             lines.append(doc)
 
     return analysis_doc, lines
