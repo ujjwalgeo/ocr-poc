@@ -132,10 +132,10 @@ def annotate_elevation_page_using_rawtext(asbuilt, search_text='pole elevation',
 
 
 if __name__ == "__main__":
-    # asbuilts = coll.find()
-    # asbuilt_ids = [o["_id"] for o in asbuilts]
+    asbuilts = coll.find()
+    asbuilt_ids = [o["_id"] for o in asbuilts]
 
-    asbuilt_ids = [ "6104b3987ca78bc7866ee89d" ]
+    # asbuilt_ids = [ "6104b3987ca78bc7866ee89d" ]
     for asbuilt_id in asbuilt_ids:
         reset_page_type_annotations(asbuilt_id)
 
