@@ -44,7 +44,7 @@ def create_red_image(image_file, output_file, overwrite=False):
                 raise Exception("Error while saving red file %s" % output_file)
 
     # return width and height here since we don't want to use opencv again later just to retrieve image dims
-    width, height = img.shape[1], img.shape[2]
+    width, height = img.shape[1], img.shape[0]
     has_red_pixels = np.asscalar((out.min() > 0) or (out.max() > 0))
     return width, height, has_red_pixels
 
