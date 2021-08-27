@@ -188,6 +188,28 @@ known_errors = {
     'DISTING': 'EXISTING',
     'LICHT': 'LIGHT',
     'MEW': 'NEW',
+    'NEUIKAL': 'NEUTRAL'
+}
+
+entity_mappings = {
+    "AC LOAD PANEL": "BOX",
+    "AC PANEL": "BOX",
+    "BANNER": "BOX",
+    "COMMUNICATION LINE": "POINT",
+    "CROSS ARM": "BOX",
+    "FIBER DIST PANEL": "BOX",
+    "GUY WIRES": "POINT",
+    "LIGHT ARM": "BOX",
+    "OTHER": "BOX",
+    "POWER METER": "BOX",
+    "POWER RISER": "BOX",
+    "PRIMARY POWER": "BOX",
+    "SECONDARY POWER": "BOX",
+    "SHROUD": "BOX",
+    "SIGN": "BOX",
+    "SURVEILLANCE EQUIPMENT": "BOX",
+    "TRAFFIC SIGNAL": "BOX",
+    "TRANSFORMER": "BOX"
 }
 
 core_entities = [
@@ -205,9 +227,25 @@ core_entities = [
     "FIBER DIST PANEL",
     "STREET SIGN",
     "AC LOAD PANEL",
+    "AC PANEL",
     "OVERHEAD CATV",
     "TELCO CONNECTION",
-    "RADIO LTE"
+    "RADIO LTE",
+
+    "BANNER",
+    "BOX",
+    "COMMUNICATION LINE",
+    "CROSS ARM",
+    "GUY WIRE",
+    "LIGHT ARM",
+    "OTHER",
+    "POWER METER",
+    "POWER RISER",
+    "PRIMARY POWER",
+    "SIGN",
+    "TRAFFIC SIGNAL",
+    "TRANSFORMER",
+    "SURVEILLANCE EQUIPMENT"
 ]
 
 # known_labels = [
@@ -625,13 +663,19 @@ def _get_page_dims(mongo_hlpr, analysis_id, category='as-built'):
     # for regx in [regx5]:
         ocr_lines = mongo_hlpr.query(OCR_LINE_COLLECTION, {"analysis_id": analysis_id, "text": regx})
         for line in ocr_lines:
-            t = line["text"]
+            t = str(line["text"])
             t = _replace_words_with_errors(t)
 
-            feet_symbol_count = len(str(t).split("\'"))
+            feet_symbol_count = len(t.split("\'"))
             if feet_symbol_count > 2:
-                print('cant parse %s' % t)
-                continue
+                if "(" in t:
+                    # skip lat/lng values being detected as dims '41\' 57\' 42.54" (41.961817)'
+                    print('cant parse %s' % t)
+                    continue
+
+                # if there are more than 1 feet symbol, replace second one with inch symbol
+                last_occur_index = t.rfind("'")
+                t = t[:last_occur_index] + '"' + t[last_occur_index+1:]
 
             label = ""
             dim_feet = 0
