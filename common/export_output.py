@@ -263,14 +263,14 @@ def export_output_csv(dbname, project_id):
                 if len(proposed_top_dims):
                     proposed_top_dim = proposed_top_dims[0]
                     proposed_data[col_name_top].append(
-                        np.around((proposed_top_dim['feet'] + float(proposed_top_dim['inches']) / 12), 2))
+                        np.around((float(proposed_top_dim['feet']) + float(proposed_top_dim['inches']) / 12), 2))
                 else:
                     proposed_data[col_name_top].append(-1)
 
                 if len(existing_top_dims):
                     existing_top_dim = existing_top_dims[0]
                     existing_data[col_name_top].append(
-                        np.around((existing_top_dim['feet'] + float(existing_top_dim['inches']) / 12), 2))
+                        np.around((float(existing_top_dim['feet']) + float(existing_top_dim['inches']) / 12), 2))
                 else:
                     existing_data[col_name_top].append(-1)
 
@@ -278,14 +278,14 @@ def export_output_csv(dbname, project_id):
                 if len(proposed_bottom_dims):
                     proposed_bottom_dim = proposed_bottom_dims[0]
                     proposed_data[col_name_bottom].append(
-                        np.around((proposed_bottom_dim['feet'] + float(proposed_bottom_dim['inches']) / 12), 2))
+                        np.around((float(proposed_bottom_dim['feet']) + float(proposed_bottom_dim['inches']) / 12), 2))
                 else:
                     proposed_data[col_name_bottom].append(-1)
 
                 if len(existing_bottom_dims):
                     existing_bottom_dim = existing_bottom_dims[0]
                     existing_data[col_name_bottom].append(
-                        np.around((existing_bottom_dim['feet'] + float(existing_bottom_dim['inches']) / 12), 2))
+                        np.around((float(existing_bottom_dim['feet']) + float(existing_bottom_dim['inches']) / 12), 2))
                 else:
                     existing_data[col_name_bottom].append(-1)
 
@@ -301,14 +301,14 @@ def export_output_csv(dbname, project_id):
                 if len(proposed_entity_dims):
                     entity_dim = proposed_entity_dims[0]
                     proposed_data[col_name].append(
-                        np.around((entity_dim['feet'] + float(entity_dim['inches']) / 12), 2))
+                        np.around((float(entity_dim['feet']) + float(entity_dim['inches']) / 12), 2))
                 else:
                     proposed_data[col_name].append(-1)
 
                 if len(existing_entity_dims):
                     entity_dim = existing_entity_dims[0]
                     existing_data[col_name].append(
-                        np.around((entity_dim['feet'] + float(entity_dim['inches']) / 12), 2))
+                        np.around((float(entity_dim['feet']) + float(entity_dim['inches']) / 12), 2))
                 else:
                     existing_data[col_name].append(-1)
 
