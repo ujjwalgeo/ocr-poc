@@ -151,6 +151,15 @@ def get_page_types(asbuilt):
     return page_types
 
 
+def get_dim_value(dim):
+    dv = -1
+    try:
+       dv = np.around((float(dim['feet']) + float(dim['inches']) / 12), 2)
+    except:
+        pass
+    return dv
+
+
 def export_output_csv(dbname, project_id):
 
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
@@ -262,30 +271,26 @@ def export_output_csv(dbname, project_id):
                 proposed_top_dims, existing_top_dims = search_dims(ad, entity, pages, page_types, position='TOP')
                 if len(proposed_top_dims):
                     proposed_top_dim = proposed_top_dims[0]
-                    proposed_data[col_name_top].append(
-                        np.around((float(proposed_top_dim['feet']) + float(proposed_top_dim['inches']) / 12), 2))
+                    proposed_data[col_name_top].append(get_dim_value(proposed_top_dim))
                 else:
                     proposed_data[col_name_top].append(-1)
 
                 if len(existing_top_dims):
                     existing_top_dim = existing_top_dims[0]
-                    existing_data[col_name_top].append(
-                        np.around((float(existing_top_dim['feet']) + float(existing_top_dim['inches']) / 12), 2))
+                    existing_data[col_name_top].append(get_dim_value(existing_top_dim))
                 else:
                     existing_data[col_name_top].append(-1)
 
                 proposed_bottom_dims, existing_bottom_dims = search_dims(ad, entity, pages, page_types, position='BOTTOM')
                 if len(proposed_bottom_dims):
                     proposed_bottom_dim = proposed_bottom_dims[0]
-                    proposed_data[col_name_bottom].append(
-                        np.around((float(proposed_bottom_dim['feet']) + float(proposed_bottom_dim['inches']) / 12), 2))
+                    proposed_data[col_name_bottom].append(get_dim_value(proposed_bottom_dim))
                 else:
                     proposed_data[col_name_bottom].append(-1)
 
                 if len(existing_bottom_dims):
                     existing_bottom_dim = existing_bottom_dims[0]
-                    existing_data[col_name_bottom].append(
-                        np.around((float(existing_bottom_dim['feet']) + float(existing_bottom_dim['inches']) / 12), 2))
+                    existing_data[col_name_bottom].append(get_dim_value(existing_bottom_dim))
                 else:
                     existing_data[col_name_bottom].append(-1)
 
@@ -300,18 +305,15 @@ def export_output_csv(dbname, project_id):
 
                 if len(proposed_entity_dims):
                     entity_dim = proposed_entity_dims[0]
-                    proposed_data[col_name].append(
-                        np.around((float(entity_dim['feet']) + float(entity_dim['inches']) / 12), 2))
+                    proposed_data[col_name].append(get_dim_value(entity_dim))
                 else:
                     proposed_data[col_name].append(-1)
 
                 if len(existing_entity_dims):
                     entity_dim = existing_entity_dims[0]
-                    existing_data[col_name].append(
-                        np.around((float(entity_dim['feet']) + float(entity_dim['inches']) / 12), 2))
+                    existing_data[col_name].append(get_dim_value(entity_dim))
                 else:
                     existing_data[col_name].append(-1)
-
 
     df = pd.DataFrame(proposed_data)
     df = df.sort_values('scu')
