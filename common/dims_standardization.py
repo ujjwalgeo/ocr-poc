@@ -422,7 +422,7 @@ def export_output_csv(dbname, project_id):
         'analysis_id': []
     }
 
-    def search_redline_dims(doc, entity, pages, position=None):
+    def search_redline_dims(doc, entity, pages, page_types, position=None):
         value = None
         try:
             for page in pages:
@@ -455,7 +455,7 @@ def export_output_csv(dbname, project_id):
 
         return value
 
-    def search_dims(doc, entity, pages, position=None):
+    def search_dims(doc, entity, pages, page_types, position=None):
         value = None
         try:
             for page in pages:
@@ -497,6 +497,13 @@ def export_output_csv(dbname, project_id):
                 return items[0]['value']
         return prev_value
 
+    def get_page_types(asbuilt):
+        # create dictionary of page_number: page_type
+        page_types = {}
+        for page in asbuilt['pages']:
+            page_types[page['page']] = page.get('page_type', None)
+        return page_types
+
     n_docs = len(asbuilt_doc_ids)
     idx = 0
     for doc_id in asbuilt_doc_ids:
@@ -526,14 +533,6 @@ def export_output_csv(dbname, project_id):
                 address = extract_from_kvp_parser_object(si, 'address')
                 # county = kvps.get('COUNTY', 'XXXX')
 
-        # if not 'site_info' in ad:
-        #     log.info('no site info - %s' % ad['source_file'])
-        #     continue
-        #
-        # if not 'kvps' in ad['site_info']:
-        #     log.info('no site info kvps - %s' % ad['source_file'])
-        #     continue
-
         if ad.get('site_info'):
             if 'kvps' in ad['site_info']:
                 kvps = ad['site_info']['kvps']
@@ -559,37 +558,39 @@ def export_output_csv(dbname, project_id):
         file = os.path.basename(ad['source_file'])
 
         pages = [1, 2, 3, 4]
-        pole_height = search_dims(ad, "POLE", pages=pages, position='TOP')
+        page_types = get_page_types(ad)
+
+        pole_height = search_dims(ad, "POLE", pages, page_types, position='TOP')
         pole_height_comment = "as-built"
 
-        redline_pole_height = search_redline_dims(ad, 'POLE', pages=pages)
+        redline_pole_height = search_redline_dims(ad, 'POLE', pages, page_types)
         if redline_pole_height:
             pole_height = redline_pole_height
             pole_height_comment = 'redline'
 
-        primary_power = search_dims(ad, 'PRIMARY ELECTRICAL', pages=pages)
+        primary_power = search_dims(ad, 'PRIMARY ELECTRICAL', pages, page_types)
         primary_power_comment = ""
 
-        secondary_power = search_dims(ad, 'SECONDARY SERVICE', pages=pages)
+        secondary_power = search_dims(ad, 'SECONDARY SERVICE', pages, page_types)
         secondary_power_comment = ""
 
         if secondary_power is None:
-            secondary_power = search_dims(ad, 'SECONDARY POWER', pages=pages)
+            secondary_power = search_dims(ad, 'SECONDARY POWER', pages, page_types)
             secondary_power_comment = ""
 
-        fiber_dist = search_dims(ad, 'FIBER DIST PANEL', pages=pages)
+        fiber_dist = search_dims(ad, 'FIBER DIST PANEL', pages, page_types)
         fiber_dist_comment = ""
 
-        ac_load = search_dims(ad, 'AC LOAD PANEL', pages=pages)
+        ac_load = search_dims(ad, 'AC LOAD PANEL', pages, page_types)
         ac_load_comment = ""
 
-        sign = search_dims(ad, 'STREET SIGN', pages=pages)
+        sign = search_dims(ad, 'STREET SIGN', pages, page_types)
         sign_comment = ""
 
-        shroud = search_dims(ad, 'SHROUD', pages=pages)
+        shroud = search_dims(ad, 'SHROUD', pages, page_types)
         shroud_comment = ""
 
-        antenna = search_dims(ad, 'ANTENNA', pages=pages)
+        antenna = search_dims(ad, 'ANTENNA', pages, page_types)
         antenna_comment = ""
 
         data['scu'].append(scu)
@@ -818,8 +819,8 @@ if __name__ == '__main__':
     log = logger.logger
 
     # mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
-    match_dimensional_lines(dbname, project_id)
-    identify_labels(dbname, project_id)
+    # match_dimensional_lines(dbname, project_id)
+    # identify_labels(dbname, project_id)
     export_output_csv(dbname, project_id)
 
     # analysis_id = ObjectId ("60ff65991e23b73c6053a8b3")
