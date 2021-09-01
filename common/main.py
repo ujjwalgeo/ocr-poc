@@ -31,8 +31,8 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
     pages = [1, 2, 3, 4]
     idx = 0
     n_files = len(pdf_files)
-    for pdf_file in pdf_files:
 
+    for pdf_file in pdf_files:
         log.info('Extracting pages for %s (%d of %d)' % (pdf_file, idx+1, n_files))
         pdf_doc = PDFDocument(file_path=pdf_file, output_dir=output_folder)
         asbuilt_oid = ObjectId()
@@ -78,7 +78,7 @@ def ocr_red_images(project_name, db_name, overwrite=True):
                     # red image ocr
                     if ep['has_red_pixels']:
                         log.info('ocr red: %s' % ep['red_image'])
-                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(ep['red_image'], project_name,
+                        red_ocr_doc, red_ocr_lines = run_ocr_restapi(as_built_id, ep['red_image'], project_name,
                                                                      page_number=ep['page'],
                                                                      category='redline')
                         if len(red_ocr_lines):
@@ -116,17 +116,6 @@ def ocr_asbuilts(project_name, db_name, overwrite=False):
             continue
 
         extracted_pages = as_built['pages']
-        # {
-        #     "pdf": pdf_out_file,
-        #     "image": img_out_file,
-        #     "image_width": img_w,
-        #     "image_height": img_h,
-        #     "red_image": red_image_path,
-        #     "has_red_pixels": has_red_pixels,
-        #     "page": i,
-        #     "raw_text": text,
-        #     "annotations": annotation
-        # }
         ep_dirty = False
         for ep in extracted_pages:
             if overwrite or (ep.get('ocr_analysis_id') is None):
@@ -163,19 +152,6 @@ if __name__ == '__main__':
     from common import logger
     from common.config import DBNAME, PROJECT, ASBUILTS_FOLDER
 
-    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/chicago_test'
-    # folder  = r"/home/unarayan@us.crowncastle.com/ocrpoc/data/chicago/"
-    # project_id = 'chicago_big'
-    # dbname = 'chicago_big1'
-
-    # folder = r'/Users/ujjwal/projects/cci/data/as-builts/new_batch_demo'
-    # project_id = 'new_batch_demo'
-    # dbname = 'new_batch_demo'
-
-    # folder = r'/home/unarayan@us.crowncastle.com/ocrpoc/data/100_test_set_asbuilts'
-    # project_id = 'colo_test_set'
-    # dbname = 'colo_test_set'
-
     folder = ASBUILTS_FOLDER
     dbname = DBNAME
     project_id = PROJECT
@@ -183,6 +159,6 @@ if __name__ == '__main__':
     logger.setup()
     log = logger.logger
 
-    process_folder(folder, project_id, dbname, num_files=None)
-    ocr_asbuilts(project_id, dbname, True)
+    # process_folder(folder, project_id, dbname, num_files=1, output_folder=None, overwrite=False)
+    # ocr_asbuilts(project_id, dbname, True)
     ocr_red_images(project_id, dbname)

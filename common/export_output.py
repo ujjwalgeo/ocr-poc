@@ -137,6 +137,44 @@ def search_dims(doc, entity, pages, page_types, position=None):
     return proposed_dims, existing_dims
 
 
+def search_redline_dims(doc, entity, pages, page_types, position=None):
+    proposed_dims = []
+    existing_dims = []
+    try:
+        for page in pages:
+            _dims = doc['redline_dims']
+            if len(_dims) <= (page - 1):
+                continue
+            page_dims = _dims[page - 1]['dims']
+            page_type = page_types.get(page, "")
+
+            entity = entity.lower()
+            found_dims = []
+            if position:
+                position = position.lower()
+
+            for dim in page_dims:
+                if position:
+                    if ((dim['entity']).lower() == entity) and (position == dim['position'].lower()):
+                        found_dims.append(dim)
+                elif (dim['entity']).lower() == entity:
+                    found_dims.append(dim)
+                else:
+                    pass
+
+            if 'existing' in page_type:
+                existing_dims = found_dims
+            elif 'proposed' in page_type:
+                proposed_dims = found_dims
+            else:
+                pass
+
+    except Exception as ex:
+        log.info(str(ex))
+
+    return proposed_dims, existing_dims
+
+
 def extract_from_kvp_parser_object(obj, property, prev_value=None):
     items = obj.get(property, None)
     if items and isinstance(items, list):
@@ -162,6 +200,93 @@ def get_dim_value(dim):
     return dv
 
 
+def get_entity_dims(ad, pages, page_types, entity, entity_class, redline=False):
+
+    proposed_dim_value = None
+    existing_dim_value = None
+
+    if entity_class == 'BOX':
+
+        # we will look for TOP and BOTTOM position separately
+        if redline:
+            proposed_top_dims, existing_top_dims = search_redline_dims(ad, entity, pages, page_types, position='TOP')
+            proposed_bottom_dims, existing_bottom_dims = search_redline_dims(ad, entity, pages, page_types,
+                                                                 position='BOTTOM')
+        else:
+            proposed_top_dims, existing_top_dims = search_dims(ad, entity, pages, page_types, position='TOP')
+            proposed_bottom_dims, existing_bottom_dims = search_dims(ad, entity, pages, page_types,
+                                                                 position='BOTTOM')
+
+        proposed_top_dim_value = -1
+        existing_top_dim_value = -1
+        proposed_bottom_dim_value = -1
+        existing_bottom_dim_value = -1
+
+        if len(proposed_top_dims):
+            proposed_top_dim = proposed_top_dims[0]
+            proposed_top_dim_value = get_dim_value(proposed_top_dim)
+
+        if len(existing_top_dims):
+            existing_top_dim = existing_top_dims[0]
+            existing_top_dim_value = get_dim_value(existing_top_dim)
+
+        if len(proposed_bottom_dims):
+            proposed_bottom_dim = proposed_bottom_dims[0]
+            proposed_bottom_dim_value = get_dim_value(proposed_bottom_dim)
+
+        if len(existing_bottom_dims):
+            existing_bottom_dim = existing_bottom_dims[0]
+            existing_bottom_dim_value = get_dim_value(existing_bottom_dim)
+
+        # if we didn't find any top and bottom dim values, check whether 2 entries are present
+        # without TOP and BOTTOM labels if yes use the lower one as bottom and higher one as top
+        if redline:
+            proposed_dims, existing_dims = search_redline_dims(ad, entity, pages, page_types, position=None)
+        else:
+            proposed_dims, existing_dims = search_dims(ad, entity, pages, page_types, position=None)
+
+        if len(proposed_dims) > 1:
+            proposed_top_dim_value1 = get_dim_value(proposed_dims[0])
+            proposed_top_dim_value2 = get_dim_value(proposed_dims[1])
+
+            if proposed_top_dim_value1 > proposed_top_dim_value2:
+                proposed_top_dim_value = proposed_top_dim_value1
+                proposed_bottom_dim_value = proposed_top_dim_value2
+            else:
+                proposed_top_dim_value = proposed_top_dim_value2
+                proposed_bottom_dim_value = proposed_top_dim_value1
+
+        if len(existing_dims) > 1:
+            existing_top_dim_value1 = get_dim_value(existing_dims[0])
+            existing_top_dim_value2 = get_dim_value(existing_dims[1])
+
+            if existing_top_dim_value1 > existing_top_dim_value2:
+                existing_top_dim_value = existing_top_dim_value1
+                existing_bottom_dim_value = existing_top_dim_value2
+            else:
+                existing_top_dim_value = existing_top_dim_value2
+                existing_bottom_dim_value = existing_top_dim_value1
+
+        if (proposed_bottom_dim_value != -1) or (proposed_top_dim_value != -1):
+            proposed_dim_value = "%.2f-%.2f" % (proposed_bottom_dim_value, proposed_top_dim_value)
+
+        if (existing_bottom_dim_value != -1) or (existing_top_dim_value != -1):
+            existing_dim_value = "%.2f-%.2f" % (existing_bottom_dim_value, existing_top_dim_value)
+
+    else:
+        if redline:
+            proposed_entity_dims, existing_entity_dims = search_redline_dims(ad, entity, pages, page_types)
+        else:
+            proposed_entity_dims, existing_entity_dims = search_dims(ad, entity, pages, page_types)
+
+        if len(proposed_entity_dims):
+            proposed_dim_value = "-".join("%.2f" % get_dim_value(d) for d in proposed_entity_dims)
+        if len(existing_entity_dims):
+            existing_dim_value = "-".join("%.2f" % get_dim_value(d) for d in existing_entity_dims)
+
+    return existing_dim_value, proposed_dim_value
+
+
 def export_output_csv(dbname, project_id):
 
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
@@ -172,6 +297,7 @@ def export_output_csv(dbname, project_id):
     proposed_data = {
         'scu': [],
         'source_file': [],
+        'filename': [],
         'jurisdiction': [],
         'file': [],
         'owner': [],
@@ -185,6 +311,7 @@ def export_output_csv(dbname, project_id):
     existing_data = {
         'scu': [],
         'source_file': [],
+        'filename': [],
         'analysis_id': []
     }
 
@@ -247,6 +374,7 @@ def export_output_csv(dbname, project_id):
 
         proposed_data['scu'].append(scu)
         proposed_data['source_file'].append(ad['source_file'])
+        proposed_data['filename'].append(os.path.basename(ad['source_file']))
         proposed_data['jurisdiction'].append(jurisdiction)
         proposed_data['owner'].append(owner)
         proposed_data['file'].append(file)
@@ -258,102 +386,35 @@ def export_output_csv(dbname, project_id):
 
         existing_data['scu'].append(scu)
         existing_data['source_file'].append(ad['source_file'])
+        existing_data['filename'].append(os.path.basename(ad['source_file']))
         existing_data['analysis_id'].append(str(ad['_id']))
 
         for entity in core_dimensional_entities:
-            # if entity == 'SIGN':
-            #     print(entity)
-
             entity_class = dimensional_entity_mappings.get(entity, None)
-            if entity_class == 'BOX':
-                col_name_top = "%s_%s" % (entity, 'TOP')
-                if col_name_top not in proposed_data:
-                    proposed_data[col_name_top] = []
-                if col_name_top not in existing_data:
-                    existing_data[col_name_top] = []
 
-                col_name_bottom = "%s_%s" % (entity, 'BOTTOM')
-                if col_name_bottom not in proposed_data:
-                    proposed_data[col_name_bottom] = []
-                if col_name_bottom not in existing_data:
-                    existing_data[col_name_bottom] = []
+            if entity not in proposed_data:
+                proposed_data[entity] = []
+            if entity not in existing_data:
+                existing_data[entity] = []
 
-                # we will look for TOP and BOTTOM position separately
-                proposed_top_dims, existing_top_dims = search_dims(ad, entity, pages, page_types, position='TOP')
-                proposed_bottom_dims, existing_bottom_dims = search_dims(ad, entity, pages, page_types,
-                                                                         position='BOTTOM')
-                proposed_top_dim_value = -1
-                existing_top_dim_value = -1
-                proposed_bottom_dim_value = -1
-                existing_bottom_dim_value = -1
+            existing_dim_value, proposed_dim_value = get_entity_dims(ad, pages, page_types, entity, entity_class,
+                                                                     redline=False)
+            existing_dim_red_value, proposed_dim_red_value = get_entity_dims(ad, pages, page_types, entity,
+                                                                             entity_class, redline=True)
 
-                if len(proposed_top_dims):
-                    proposed_top_dim = proposed_top_dims[0]
-                    proposed_top_dim_value = get_dim_value(proposed_top_dim)
-
-                if len(existing_top_dims):
-                    existing_top_dim = existing_top_dims[0]
-                    existing_top_dim_value = get_dim_value(existing_top_dim)
-
-                if len(proposed_bottom_dims):
-                    proposed_bottom_dim = proposed_bottom_dims[0]
-                    proposed_bottom_dim_value = get_dim_value(proposed_bottom_dim)
-
-                if len(existing_bottom_dims):
-                    existing_bottom_dim = existing_bottom_dims[0]
-                    existing_bottom_dim_value = get_dim_value(existing_bottom_dim)
-
-                # if we didn't find any top and bottom dim values, check whether 2 entries are present
-                # without TOP and BOTTOM labels if yes use the lower one as bottom and higher one as top
-                proposed_dims, existing_dims = search_dims(ad, entity, pages, page_types, position=None)
-                if len(proposed_dims) > 1:
-                    proposed_top_dim_value1 = get_dim_value(proposed_dims[0])
-                    proposed_top_dim_value2 = get_dim_value(proposed_dims[1])
-
-                    if proposed_top_dim_value1 > proposed_top_dim_value2:
-                        proposed_top_dim_value = proposed_top_dim_value1
-                        proposed_bottom_dim_value = proposed_top_dim_value2
-                    else:
-                        proposed_top_dim_value = proposed_top_dim_value2
-                        proposed_bottom_dim_value = proposed_top_dim_value1
-
-                if len(existing_dims) > 1:
-                    existing_top_dim_value1 = get_dim_value(existing_dims[0])
-                    existing_top_dim_value2 = get_dim_value(existing_dims[1])
-
-                    if existing_top_dim_value1 > existing_top_dim_value2:
-                        existing_top_dim_value = existing_top_dim_value1
-                        existing_bottom_dim_value = existing_top_dim_value2
-                    else:
-                        existing_top_dim_value = existing_top_dim_value2
-                        existing_bottom_dim_value = existing_top_dim_value1
-
-                proposed_data[col_name_top].append(proposed_top_dim_value)
-                proposed_data[col_name_bottom].append(proposed_bottom_dim_value)
-
-                existing_data[col_name_top].append(existing_top_dim_value)
-                existing_data[col_name_bottom].append(existing_bottom_dim_value)
-
+            if proposed_dim_red_value:
+                proposed_data[entity].append(proposed_dim_red_value)
+            elif proposed_dim_value:
+                proposed_data[entity].append(proposed_dim_value)
             else:
-                col_name = entity
-                if col_name not in proposed_data:
-                    proposed_data[col_name] = []
-                if col_name not in existing_data:
-                    existing_data[col_name] = []
+                proposed_data[entity].append("X")
 
-                proposed_entity_dims, existing_entity_dims = search_dims(ad, entity, pages, page_types)
-
-                if len(proposed_entity_dims):
-                    entity_dim = proposed_entity_dims[0]
-                    proposed_data[col_name].append(get_dim_value(entity_dim))
-                else:
-                    proposed_data[col_name].append(-1)
-
-                if len(existing_entity_dims):
-                    entity_dim = existing_entity_dims[0]
-                    existing_data[col_name].append(get_dim_value(entity_dim))
-                else:
-                    existing_data[col_name].append(-1)
+            if existing_dim_red_value:
+                existing_data[entity].append(existing_dim_red_value)
+            elif existing_dim_value:
+                existing_data[entity].append(existing_dim_value)
+            else:
+                existing_data[entity].append("X")
 
     df = pd.DataFrame(proposed_data)
     df = df.sort_values('scu')

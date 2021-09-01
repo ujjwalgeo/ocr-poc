@@ -819,9 +819,9 @@ if __name__ == '__main__':
     log = logger.logger
 
     # mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
-    # match_dimensional_lines(dbname, project_id)
-    # identify_labels(dbname, project_id)
-    export_output_csv(dbname, project_id)
+    match_dimensional_lines(dbname, project_id)
+    identify_labels(dbname, project_id)
+    # export_output_csv(dbname, project_id)
 
     # analysis_id = ObjectId ("60ff65991e23b73c6053a8b3")
     # n_pages = 3
