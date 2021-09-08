@@ -1,0 +1,54 @@
+[
+  {
+    "entity": "antenna",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "top of antenna",
+        "antenna"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "coordinates",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "site coordinates:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9]+",
+        "- [0-9]+\\.[0-9]+"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "multiline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  }
+
+]

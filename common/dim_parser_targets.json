@@ -1,0 +1,36 @@
+[
+  {
+    "entity": "ac_load_panel",
+    "collection": "dimensions",
+    "target": {
+        "labels": ["ac load panel", "ac panel"],
+        "category": "box",
+        "top_label": "top",
+        "bottom_label": "bottom",
+        "center_label": "₡",
+        "match": "exact",
+        "case_sensitive": false,
+        "mode": "sameline",
+        "scale_x": 1,
+        "scale_y": 1,
+        "scale_origin": "top-left"
+    }
+  },
+  {
+    "entity": "fiber_dist_panel",
+    "collection": "dimensions",
+    "target": {
+        "labels": ["fiber dist panel", "fiber distribution panel"],
+        "category": "box",
+        "top_label": "top",
+        "bottom_label": "bottom",
+        "center_label": "₡",
+        "match": "exact",
+        "case_sensitive": false,
+        "mode": "sameline",
+        "scale_x": 1,
+        "scale_y": 1,
+        "scale_origin": "top-left"
+    }
+  }
+]

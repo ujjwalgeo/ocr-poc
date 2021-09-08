@@ -194,22 +194,23 @@ known_errors = {
 entity_mappings = {
     "AC LOAD PANEL": "BOX",
     "AC PANEL": "BOX",
-    "BANNER": "BOX",
-    "COMMUNICATION LINE": "POINT",
-    "CROSS ARM": "BOX",
     "FIBER DIST PANEL": "BOX",
-    "GUY WIRES": "POINT",
-    "LIGHT ARM": "BOX",
-    "OTHER": "BOX",
-    "POWER METER": "BOX",
-    "POWER RISER": "BOX",
-    "PRIMARY POWER": "BOX",
-    "SECONDARY POWER": "BOX",
     "SHROUD": "BOX",
     "SIGN": "BOX",
+    "BANNER": "BOX",
+    "CROSS ARM": "BOX",
+    "POWER METER": "BOX",
+    "POWER RISER": "BOX",
+    "LIGHT ARM": "BOX",
     "SURVEILLANCE EQUIPMENT": "BOX",
     "TRAFFIC SIGNAL": "BOX",
-    "TRANSFORMER": "BOX"
+    "TRANSFORMER": "BOX",
+    "COMMUNICATION LINE": "POINT",
+    "GUY WIRES": "POINT",
+
+    "OTHER": "BOX",
+    "PRIMARY POWER": "BOX",
+    "SECONDARY POWER": "BOX",
 }
 
 core_entities = [

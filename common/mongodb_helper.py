@@ -26,6 +26,10 @@ class MongoHelper(object):
         coll = self.db[coll_name]
         return coll.find(query)
 
+    def count(self, coll_name, query):
+        coll = self.db[coll_name]
+        return coll.count(query)
+
     def get_document(self, coll_name, id):
         if isinstance(id, str):
             id = ObjectId(id)
