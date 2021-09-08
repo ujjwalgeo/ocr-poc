@@ -1,5 +1,31 @@
 [
   {
+    "entity": "pole",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "pole"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+  {
     "entity": "antenna",
     "category": "box",
     "label_parser": {
@@ -21,7 +47,7 @@
     "remove_spaces_in_value": true,
     "remove_special_chars_in_label": true,
     "value_type": "dimension",
-    "mode": "singleline",
+    "mode": "multiline",
     "scale_x": 2,
     "scale_y": 2,
     "scale_origin": "top-left"
@@ -60,7 +86,7 @@
     "category": "box",
     "label_parser": {
       "patterns": [
-        "fiber"
+        "fiber dist"
       ],
       "case_sensitive": false
     },
@@ -384,7 +410,7 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "comm connection",
+        "comm",
         "catv",
         "telco"
       ],
@@ -517,6 +543,33 @@
   },
 
   {
+    "entity": "grade_reference",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "grade reference"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
     "entity": "coordinates",
     "category": "point",
     "label_parser": {
@@ -589,5 +642,6 @@
     "scale_x": 2,
     "scale_y": 2,
     "scale_origin": "top-left"
-  }
+  },
+
 ]

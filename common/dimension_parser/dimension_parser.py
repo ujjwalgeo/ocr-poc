@@ -262,7 +262,7 @@ class EntityParserTemplate(object):
                 detection.parse()
                 if detection.parsed:
                     detections.append(detection.toJson())
-                    log.info(detection.toJson())
+                    # log.info(detection.toJson())
 
         return detections
 
