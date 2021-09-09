@@ -82,6 +82,8 @@ class Detection(object):
         self.text = text
         self.label_part = ""
         self.value_part = ""
+        self.value_feet = -1
+        self.value_inches = -1
         self.category = entity.category
         self.value_type = entity.value_type
         self.entity = entity
@@ -154,7 +156,9 @@ class Detection(object):
                 except Exception as  ex:
                     print("Error parsing dims from %s" % self.text)
 
-                self.value_part = "%.0f' %.2f\"" % (dim_feet, dim_inches)
+                self.value_part = "%.0f' %.0f\"" % (dim_feet, dim_inches)
+                self.value_inches = dim_inches
+                self.value_feet = dim_feet
                 self.parsed = True
 
         else:
@@ -183,18 +187,29 @@ class Detection(object):
 
         if self.category == "box":
             label_upper = self.label_part.upper()
-            if 'TOP' in label_upper:
-                self.position = "TOP"
-            if 'BOTTOM' in label_upper:
-                self.position = "BOTTOM"
-            if ('₡' in label_upper) or ('CENTER' in label_upper):
-                self.position = "CENTER"
+            label_upper = label_upper.strip()
+            label_words = label_upper.split()
+            label_words = [ l.strip() for l in label_words ]
+            position_options = ['TOP', 'BOTTOM', 'CENTER', 'OP', '₡']
+            position_indicators = [ w for w in label_words if w in position_options ]
+            if len(position_indicators):
+                if 'TOP' in position_indicators:
+                    self.position = "TOP"
+                if 'BOTTOM' in position_indicators:
+                    self.position = "BOTTOM"
+                if ('₡' in position_indicators) or ('CENTER' in position_indicators):
+                    self.position = "CENTER"
+                # some times 'TOP' is detected as 'OP'
+                if 'OP' == position_indicators[0]:
+                    self.position = "TOP"
 
     def toJson(self):
         return {
             "text": self.text,
             "label": self.label_part,
             "value": self.value_part,
+            "feet": self.value_feet,
+            "inches": self.value_inches,
             "value_type": self.value_type,
             "category": self.category,
             "entity": self.entity.entity,
@@ -233,14 +248,20 @@ class EntityParserTemplate(object):
 
     def parse_dims(self, mongo_helper, asbuilt_id, page_number, analysis_id, gdf=None):
         detections = []
+
+        # if self.entity == 'sign':
+        #     print(self.entity)
+
         for label_regx in self.label_parser.regexes:
             cursor = mongo_helper.query(OCR_LINE_COLLECTION,
                                         {"analysis_id": analysis_id, "text": label_regx})
             label_line_ids = []
             value_line_ids = []
-            for ocr_line in cursor:
+            ocr_lines = [l for l in cursor]
+            for ocr_line in ocr_lines:
                 text = ocr_line['text']
                 label_line_ids.append(ocr_line['_id'])
+                ocr_line_id = str(ocr_line['_id'])
 
                 # if mode is multiline, get more text
                 if self.mode == self.MODE_MULTILINE:
@@ -250,7 +271,8 @@ class EntityParserTemplate(object):
                         near_mask = gdf['geom'].apply(lambda x: x.intersects(line_bbox))
                         near_lines = gdf[near_mask]
                         for indx, near_line in near_lines.iterrows():
-                            if near_line['line_id'] != ocr_line['_id']:
+                            near_line_id = str(near_line['line_id'])
+                            if near_line_id != ocr_line_id:
                                 if len(near_line['text']) > 1:
                                     text = text + " " + near_line['text']
                                     value_line_ids.append(near_line['line_id'])
@@ -307,9 +329,8 @@ class DimensionParser(object):
         mongo_helper = mongodb_helper.MongoHelper(dbname)
         all_detections = []
         for entity_parser in self.entity_parsers.keys():
-            # if 'radio' in entity_parser:
-            #     print(entity_parser)
-
+            # if entity_parser != 'sign':
+            #     continue
             detections = self.entity_parsers[entity_parser].parse_dims(mongo_helper, asbuilt_id, page_number, analysis_id, gdf)
             if len(detections):
                 all_detections = all_detections + detections
@@ -341,6 +362,7 @@ def detect_dimensions(dbname, project_id, template_file):
                 ocr_detections = dimension_parser.parse_dims(doc_id, page_number, ocr_analysis_id)
                 mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id,
                                            {"pages.%d.ocr_detections" % page_num: ocr_detections})
+
             red_analysis_id = asbuilt_page.get('red_ocr_analysis_id')
             if red_analysis_id:
                 red_ocr_detections = dimension_parser.parse_dims(doc_id, page_number, red_analysis_id)
@@ -356,7 +378,7 @@ if __name__ == '__main__':
     project_id = PROJECT
     dbname = DBNAME
 
-    logger.setup('dims_standardization')
+    logger.setup('dimension_parser')
     log = logger.logger
 
     template_file = './dimension_parser_templates.json'

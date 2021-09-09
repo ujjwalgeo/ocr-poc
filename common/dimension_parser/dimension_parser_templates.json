@@ -1,7 +1,7 @@
 [
   {
     "entity": "pole",
-    "category": "box",
+    "category": "point",
     "label_parser": {
       "patterns": [
         "pole"
@@ -129,9 +129,9 @@
     "remove_spaces_in_value": true,
     "remove_special_chars_in_label": true,
     "value_type": "dimension",
-    "mode": "singleline",
+    "mode": "multiline",
     "scale_x": 2,
-    "scale_y": 2,
+    "scale_y": 1,
     "scale_origin": "top-left"
   },
 
@@ -194,7 +194,7 @@
     "category": "box",
     "label_parser": {
       "patterns": [
-        "sign"
+        "city sign"
       ],
       "case_sensitive": false
     },
@@ -643,5 +643,4 @@
     "scale_y": 2,
     "scale_origin": "top-left"
   }
-
 ]
