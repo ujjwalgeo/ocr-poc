@@ -194,7 +194,8 @@
     "category": "box",
     "label_parser": {
       "patterns": [
-        "city sign"
+        "city sign",
+        "sign"
       ],
       "case_sensitive": false
     },
