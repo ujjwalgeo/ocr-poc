@@ -1,0 +1,648 @@
+[
+  {
+    "entity": "pole",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "top of pole"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "antenna",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "antenna",
+        "rad center"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "multiline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "ac_load_panel",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "ac load panel",
+        "ac panel"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "fiber_dist_panel",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "fiber dist"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "shroud",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "shroud"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "multiline",
+    "scale_x": 2,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "banner",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "banner"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "cross_arm",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "cross arm"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "sign",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "city sign",
+        "sign"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "multiline",
+    "scale_x": 2,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "power_meter",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "power meter"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "power_riser",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "riser"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "light_arm",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "mast arm",
+        "light arm"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "surveillance_equipment",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "surveillance"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "traffic_signal",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "traffic signal"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "transformer",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "transformer"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "radio",
+    "category": "box",
+    "label_parser": {
+      "patterns": [
+        "radio"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "communication_line",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "comm",
+        "catv",
+        "telco"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "guy_wire",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "guy"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "primary_power",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "primary"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "secondary_power",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "secondary"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "neutral_power",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "neutral"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "grade_reference",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "grade reference"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "coordinates",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "site coordinates:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9]+",
+        "- [0-9]+\\.[0-9]+"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "multiline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "latitude",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "latitude",
+        "lat:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9]+",
+        "- [0-9]+\\.[0-9]+"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "longitude",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "longitude",
+        "long:",
+        "lng:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9]+",
+        "- [0-9]+\\.[0-9]+"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  }
+]

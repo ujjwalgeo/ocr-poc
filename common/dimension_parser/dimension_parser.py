@@ -190,12 +190,16 @@ class Detection(object):
             label_upper = label_upper.strip()
             label_words = label_upper.split()
             label_words = [ l.strip() for l in label_words ]
-            position_options = ['TOP', 'BOTTOM', 'CENTER', 'OP', '₡']
+            position_options = ['TOP', 'BOTTOM', 'CENTER', 'OP', '₡', 'UPPER', 'LOWER']
             position_indicators = [ w for w in label_words if w in position_options ]
             if len(position_indicators):
                 if 'TOP' in position_indicators:
                     self.position = "TOP"
+                if 'UPPER' in position_indicators:
+                    self.position = "TOP"
                 if 'BOTTOM' in position_indicators:
+                    self.position = "BOTTOM"
+                if 'LOWER' in position_indicators:
                     self.position = "BOTTOM"
                 if ('₡' in position_indicators) or ('CENTER' in position_indicators):
                     self.position = "CENTER"
@@ -381,5 +385,5 @@ if __name__ == '__main__':
     logger.setup('dimension_parser')
     log = logger.logger
 
-    template_file = './dimension_parser_templates.json'
+    template_file = './dimension_parser_templates_chicago.json'
     detect_dimensions(dbname, project_id, template_file)
