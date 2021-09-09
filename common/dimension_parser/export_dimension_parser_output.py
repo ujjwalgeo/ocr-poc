@@ -70,6 +70,8 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
     entity_parsers = dimension_parser.entity_parsers
     for k, ep in entity_parsers.items():
         _data[k] = []
+        _data["%s_comment" % k] = []
+        _data["%s_redline" % k] = []
 
     n_docs = len(asbuilt_doc_ids)
     idx = 0
@@ -138,10 +140,14 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
         _data['analysis_id'].append(str(ad['_id']))
 
         page_dims = []
+        page_red_dims = []
+        page_n = 0
         for page in ad['pages']:
             pg_type = page.get('page_type', None)
             if pg_type == page_type:
                 page_dims = page.get('ocr_detections', [])
+                page_red_dims = page.get('red_ocr_detections', [])
+                page_n = page['page']
 
         for k, v in entity_parsers.items():
 
@@ -152,6 +158,15 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
 
             dim_value = get_dim_value(v, page_dims)
             _data[k].append(dim_value)
+            comment = "page %d" % page_n
+            if (dim_value == "X") or (dim_value == "X-X"):
+                comment = ""
+
+            _data["%s_comment" % k].append(comment)
+
+            dim_red_value = get_dim_value(v, page_red_dims)
+            _data["%s_redline" % k].append(dim_red_value)
+
 
     df = pd.DataFrame(_data)
     df = df.sort_values('scu')
