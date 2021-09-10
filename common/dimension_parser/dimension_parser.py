@@ -27,11 +27,13 @@ def _poly_from_bbox(bbox, scale_x=1., scale_y=1., origin=SCALE_ORIGIN_CENTER):
 
 
 class RegexParser(object):
-    def __init__(self, template):
+    def __init__(self, template, pad_with_spaces=False):
         self.patterns = template.get('patterns', [])
         case_sensitive = template.get('case_sensitive', False)
         self.regexes = []
         for pattern in self.patterns:
+            if pad_with_spaces:
+                pattern = " %s " % pattern
             if case_sensitive:
                 regx = re.compile(pattern)
             else:
@@ -156,7 +158,7 @@ class Detection(object):
                 except Exception as  ex:
                     print("Error parsing dims from %s" % self.text)
 
-                self.value_part = "%.0f' %.0f\"" % (dim_feet, dim_inches)
+                self.value_part = "%.2f" % (dim_feet + dim_inches/12.)
                 self.value_inches = dim_inches
                 self.value_feet = dim_feet
                 self.parsed = True
@@ -239,7 +241,7 @@ class EntityParserTemplate(object):
     def __init__(self, template):
         self.entity = template['entity']
         self.category = template['category']
-        self.label_parser = RegexParser(template['label_parser'])
+        self.label_parser = RegexParser(template['label_parser'], pad_with_spaces=False)
         self.value_parser = RegexParser(template['value_parser'])
         self.remove_spaces_in_values = template.get('remove_spaces_in_value', False)
         self.remove_special_chars_in_label = template.get('remove_special_chars_in_label', False)
@@ -330,15 +332,60 @@ class DimensionParser(object):
 
     def parse_dims(self, asbuilt_id, page_number, analysis_id):
         gdf = self.load_analysis_gdf(analysis_id)
-        mongo_helper = mongodb_helper.MongoHelper(dbname)
+        mongo_helper = mongodb_helper.MongoHelper(self.dbname)
         all_detections = []
         for entity_parser in self.entity_parsers.keys():
-            # if entity_parser != 'sign':
-            #     continue
-            detections = self.entity_parsers[entity_parser].parse_dims(mongo_helper, asbuilt_id, page_number, analysis_id, gdf)
+            detections = self.entity_parsers[entity_parser].parse_dims(mongo_helper, asbuilt_id, page_number,
+                                                                       analysis_id, gdf)
             if len(detections):
                 all_detections = all_detections + detections
         return all_detections
+
+
+def export_dimensional_lines(dbname, project_id):
+    mongo_helper = mongodb_helper.MongoHelper(dbname)
+    asbuilts = mongo_helper.query(ASBUILTS_COLLECTION, {'project': project_id})
+    asbuilt_ids = [ad['_id'] for ad in asbuilts]
+    # asbuilt_ids = [ObjectId("6109a4baabba9c3dbd230d57")]
+    mongo_helper.close()
+    idx = 0
+    n_docs = len(asbuilt_ids)
+    dim_lines = []
+    for doc_id in asbuilt_ids:
+        idx += 1
+        mongo_hlpr = mongodb_helper.MongoHelper(dbname)
+        asbuilt = mongo_hlpr.get_document(ASBUILTS_COLLECTION, doc_id)
+        asbuilt_pages = asbuilt.get('pages', [])
+        log.debug('detect dimension - %s, %s: %d of %d' % (doc_id, asbuilt['source_file'], idx, n_docs))
+        dimensional_patterns = [
+            "[0-9]+'\\s*[0-9]+\"",
+            "[0-9]+'-[0-9]+\"",
+            "[0-9]+'\\s*[0-9]+",
+            "[0-9]+'-[0-9\\s\/0-9]+",
+            "[0-9]+'(?!')$"
+        ]
+        dimensional_regxes = [ re.compile(pat) for pat in dimensional_patterns ]
+
+        for asbuilt_page in asbuilt_pages:
+            ocr_analysis_id = asbuilt_page.get('ocr_analysis_id')
+            for regx in dimensional_regxes:
+                cursor = mongo_helper.query(OCR_LINE_COLLECTION,
+                                            {"analysis_id": ocr_analysis_id, "text": regx})
+                for line in cursor:
+                    text = line['text']
+                    parts = re.split(regx, text)
+                    if len(parts) == 2:
+                        label = parts[0]
+                        label = "".join([l for l in label if (l.isalnum() or l == ' ')])
+                        label = label.upper()
+                        if len(label) > 5:
+                            label = label.strip()
+                            dim_lines.append(label)
+
+    dim_lines = list(set(dim_lines))
+    dim_lines = sorted(dim_lines)
+    for l in dim_lines:
+        print (l)
 
 
 def detect_dimensions(dbname, project_id, template_file):
@@ -346,7 +393,8 @@ def detect_dimensions(dbname, project_id, template_file):
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
-    # asbuilt_ids = [ObjectId("6109a4baabba9c3dbd230d57")]
+
+    asbuilt_ids = [ ObjectId("6104b3ce7ca78bc7866ee8a0") ]
     mongo_hlpr.close()
     dimension_parser = DimensionParser(dbname, template_file)
 
@@ -387,3 +435,4 @@ if __name__ == '__main__':
 
     template_file = './dimension_parser_templates_chicago.json'
     detect_dimensions(dbname, project_id, template_file)
+    # export_dimensional_lines(dbname, project_id)

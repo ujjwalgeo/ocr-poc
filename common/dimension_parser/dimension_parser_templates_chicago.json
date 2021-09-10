@@ -4,7 +4,8 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "top of pole"
+        "top of pole",
+        "top of new pole"
       ],
       "case_sensitive": false
     },
@@ -25,6 +26,7 @@
     "scale_y": 2,
     "scale_origin": "top-left"
   },
+
   {
     "entity": "antenna",
     "category": "box",
@@ -195,7 +197,8 @@
     "label_parser": {
       "patterns": [
         "city sign",
-        "sign"
+        "street sign",
+        " sign"
       ],
       "case_sensitive": false
     },
@@ -249,7 +252,7 @@
     "category": "box",
     "label_parser": {
       "patterns": [
-        "riser"
+        " riser"
       ],
       "case_sensitive": false
     },
@@ -385,7 +388,117 @@
     "category": "box",
     "label_parser": {
       "patterns": [
-        "radio"
+        " radio"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "electric_box",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "electric box"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "comm_box",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "comm box"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "catv",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        " catv",
+        "catvcomm",
+        "commcatv"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9]+'\\s*[0-9]+\"",
+        "[0-9]+'-[0-9]+\"",
+        "[0-9]+'\\s*[0-9]+",
+        "[0-9]+'-[0-9\\s\/0-9]+",
+        "[0-9]+'(?!')$"
+      ]
+    },
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "dimension",
+    "mode": "singleline",
+    "scale_x": 2,
+    "scale_y": 2,
+    "scale_origin": "top-left"
+  },
+
+  {
+    "entity": "nid",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        " nid "
       ],
       "case_sensitive": false
     },
@@ -412,9 +525,9 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "comm",
-        "catv",
-        "telco"
+        "comm connection",
+        "service connection",
+        "telco connection"
       ],
       "case_sensitive": false
     },
@@ -441,7 +554,7 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "guy"
+        " guy"
       ],
       "case_sensitive": false
     },
@@ -522,7 +635,8 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "neutral"
+        "neutral",
+        "neuikal"
       ],
       "case_sensitive": false
     },
@@ -569,80 +683,6 @@
     "scale_x": 2,
     "scale_y": 2,
     "scale_origin": "top-left"
-  },
-
-  {
-    "entity": "coordinates",
-    "category": "point",
-    "label_parser": {
-      "patterns": [
-        "site coordinates:"
-      ],
-      "case_sensitive": false
-    },
-    "value_parser": {
-      "patterns": [
-        "-?[0-9]+\\.[0-9]+",
-        "- [0-9]+\\.[0-9]+"
-      ]
-    },
-    "remove_spaces_in_value": true,
-    "remove_special_chars_in_label": true,
-    "value_type": "geo",
-    "mode": "multiline",
-    "scale_x": 2,
-    "scale_y": 2,
-    "scale_origin": "top-left"
-  },
-
-  {
-    "entity": "latitude",
-    "category": "point",
-    "label_parser": {
-      "patterns": [
-        "latitude",
-        "lat:"
-      ],
-      "case_sensitive": false
-    },
-    "value_parser": {
-      "patterns": [
-        "-?[0-9]+\\.[0-9]+",
-        "- [0-9]+\\.[0-9]+"
-      ]
-    },
-    "remove_spaces_in_value": true,
-    "remove_special_chars_in_label": true,
-    "value_type": "geo",
-    "mode": "singleline",
-    "scale_x": 2,
-    "scale_y": 2,
-    "scale_origin": "top-left"
-  },
-
-  {
-    "entity": "longitude",
-    "category": "point",
-    "label_parser": {
-      "patterns": [
-        "longitude",
-        "long:",
-        "lng:"
-      ],
-      "case_sensitive": false
-    },
-    "value_parser": {
-      "patterns": [
-        "-?[0-9]+\\.[0-9]+",
-        "- [0-9]+\\.[0-9]+"
-      ]
-    },
-    "remove_spaces_in_value": true,
-    "remove_special_chars_in_label": true,
-    "value_type": "geo",
-    "mode": "singleline",
-    "scale_x": 2,
-    "scale_y": 2,
-    "scale_origin": "top-left"
   }
+
 ]
