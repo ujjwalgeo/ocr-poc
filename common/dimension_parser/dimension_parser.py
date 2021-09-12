@@ -129,7 +129,7 @@ class Detection(object):
                     tokens = mat.split(" ")
 
                 dim_inches = 0
-                dim_feet = "".join([t for t in tokens[0] if t.isalnum()])
+                dim_feet = "".join([t for t in tokens[0] if (t.isalnum() or (t == '.'))])
                 if len(tokens) < 2:
                     return
 
@@ -255,8 +255,8 @@ class EntityParserTemplate(object):
     def parse_dims(self, mongo_helper, asbuilt_id, page_number, analysis_id, gdf=None):
         detections = []
 
-        # if self.entity == 'sign':
-        #     print(self.entity)
+        if self.entity == 'pole':
+            print(self.entity)
 
         for label_regx in self.label_parser.regexes:
             cursor = mongo_helper.query(OCR_LINE_COLLECTION,
@@ -393,8 +393,8 @@ def detect_dimensions(dbname, project_id, template_file):
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
+    asbuilt_ids = [ ObjectId("613d38957cb374cad459655e") ]
 
-    asbuilt_ids = [ ObjectId("6104b3ce7ca78bc7866ee8a0") ]
     mongo_hlpr.close()
     dimension_parser = DimensionParser(dbname, template_file)
 

@@ -131,3 +131,5 @@ dmypy.json
 asbuilts/
 logs.txt
 common/config.py
+
+*.csv

@@ -22,6 +22,7 @@ def process_folder(input_folder, project_name, db_name, num_files=None, output_f
         os.makedirs(output_folder)
 
     pdf_files = glob(os.path.join(input_folder, '*.pdf'))
+
     if not num_files is None:
         n_files = min(len(pdf_files), num_files)
         pdf_files = pdf_files[: n_files]
@@ -159,6 +160,6 @@ if __name__ == '__main__':
     logger.setup()
     log = logger.logger
 
-    # process_folder(folder, project_id, dbname, num_files=1, output_folder=None, overwrite=False)
-    # ocr_asbuilts(project_id, dbname, True)
-    ocr_red_images(project_id, dbname)
+    process_folder(folder, project_id, dbname, num_files=None, output_folder=None, overwrite=False)
+    ocr_asbuilts(project_id, dbname, overwrite=True)
+    ocr_red_images(project_id, dbname, overwrite=True)

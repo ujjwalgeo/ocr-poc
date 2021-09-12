@@ -90,6 +90,8 @@ class PDFDocument(object):
             os.makedirs(pdf_images_out_dir)
 
         extracted = []
+        orientation = None
+
         for i in range(1, pdf_in.numPages + 1):
 
             if len(pages) and (i not in pages):
@@ -104,6 +106,20 @@ class PDFDocument(object):
                 os.remove(pdf_out_file)
 
             pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
+
+            # sometimes pages have been rotated
+            if orientation is None:
+                media_box = pdf_page["/MediaBox"]
+                lowerLeft = media_box[0], media_box[1]
+                upperRight = media_box[2], media_box[3]
+                height = abs(upperRight[1] - lowerLeft[1])
+                width = abs(upperRight[0] - lowerLeft[0])
+
+                if width < height:
+                    orientation = 'portrait'
+                else:
+                    orientation = 'landscape'
+
             if not os.path.exists(pdf_out_file):
                 pdf_out = PyPDF2.PdfFileWriter()
                 pdf_out.addPage(pdf_page)
@@ -118,6 +134,9 @@ class PDFDocument(object):
                                                      strict=False, thread_count=4,
                                                      poppler_path=POPPLER_INSTALL_PATH)
                 img = images[0]
+                if orientation == 'portrait':
+                    img = img.rotate(90, expand=True)
+
                 img.thumbnail((10000, 10000), Image.ANTIALIAS) # max image size for azure vision
                 img.save(img_out_file)
 
@@ -147,6 +166,7 @@ class PDFDocument(object):
                 "image": img_out_file,
                 "image_width": img_w,
                 "image_height": img_h,
+                "orientation": orientation,
                 "red_image": red_image_path,
                 "has_red_pixels": has_red_pixels,
                 "page": i,
@@ -157,11 +177,3 @@ class PDFDocument(object):
             self.pages.append(i)
 
         return extracted
-
-
-if __name__ == '__main__':
-
-    fl = '/Users/ujjwal/projects/cci/data/as-builts/chicago_test/CH1424BA_81LAB_Elevation_As_Built.pdf'
-    pdf_doc = PDFDocument(file_path=fl, output_dir='./')
-    extracted_pages = pdf_doc.extract_pages(pages=[1, 2])
-    print(extracted_pages)

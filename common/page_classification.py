@@ -23,11 +23,6 @@ from bson import ObjectId
 from common.mongodb_helper import MongoHelper
 from PIL import Image
 
-client = MongoClient(MONGO_DB)
-db = client[DBNAME]
-coll = db[ASBUILTS_COLLECTION]
-# asbuilt_id = "6109a413abba9c3dbd230d51"
-
 
 def reset_page_type_annotations(asbuilt_id):
     if isinstance(asbuilt_id, str):
@@ -132,6 +127,12 @@ def annotate_elevation_page_using_rawtext(asbuilt, search_text='pole elevation',
 
 
 if __name__ == "__main__":
+
+    client = MongoClient(MONGO_DB)
+    db = client[DBNAME]
+    coll = db[ASBUILTS_COLLECTION]
+    # asbuilt_id = "6109a413abba9c3dbd230d51"
+
     asbuilts = coll.find()
     asbuilt_ids = [o["_id"] for o in asbuilts]
     # wrong page type - ObjectId("6104b3bc7ca78bc7866ee89f")
