@@ -67,20 +67,26 @@ def _construct_site_info_tables(mongo_hlpr, asbuilt_id):
 
     if col1_idx <= col2_idx:
         left_col = col1_idx
-        right_col = col2_idx
+        # right_col = col2_idx
     else:
         left_col = col2_idx
-        right_col = col1_idx
+        #right_col = col1_idx
 
+    right_cols = [ idx for idx in col_counts.index.values if idx != left_col ]
     unique_rows = lines_df.rows.unique()
 
     for unique_row in unique_rows:
         row_df = lines_df.where(lines_df['rows'] == unique_row)
         key_text = row_df[row_df['cols'] == left_col]['text']
-        value_text = row_df[row_df['cols'] == right_col]['text']
-        if len(key_text.values) and len(value_text.values):
-            print("%s --> %s" % (key_text.values[0], value_text.values[0]))
-            site_info_kvps[key_text.values[0]] = value_text.values[0]
+        value_text = ""
+        for rcol in right_cols:
+            text_row = row_df[row_df['cols'] == rcol ]['text']
+            if len(text_row.values):
+                _text = text_row.values[0]
+                value_text = "%s %s" % (value_text, _text)
+        if len(key_text.values) and len(value_text):
+            print("%s --> %s" % (key_text.values[0], value_text))
+            site_info_kvps[key_text.values[0]] = value_text
 
     return site_info_kvps
 
@@ -136,8 +142,8 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
                 run_ocr = False
                 if not 'site_info' in asbuilt:
                     rerun_ocr = True
-                elif analysis_doc['site_info'] is None:
-                    rerun_ocr = True
+                # elif analysis_doc['site_info'] is None:
+                #     rerun_ocr = True
                 else:
                     if not 'analysis_id' in asbuilt['site_info']:
                         rerun_ocr = True
@@ -186,10 +192,11 @@ def _extract_site_info_data(dbname, asbuilt_id, text_size_percent=2, line_distan
 
 def process_panels(dbname, project_name):
     # detect and write panel data
+    from bson import ObjectId
     mongo_helper = MongoHelper(dbname)
     _docs = mongo_helper.query(ASBUILTS_COLLECTION, {'project': project_name})
     ids = [t['_id'] for t in _docs]
-
+    # ids = [ ObjectId('613fd2d9c7d5b6ab4642ab7f') ]
     for id in ids:
         log.info("Extracting site info for %s " % id)
         site_info_panel = _extract_site_info_data(dbname, id)

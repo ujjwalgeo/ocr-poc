@@ -5,6 +5,9 @@ import PyPDF2
 import pdf2image
 import numpy as np
 from common.config import RED_HUE_RANGE1, RED_HUE_RANGE2, POPPLER_INSTALL_PATH, PDF_2_IMAGE_DPI
+import multiprocessing as mp
+import glob
+
 
 """
 extract pages with with qpdf
@@ -107,18 +110,18 @@ class PDFDocument(object):
 
             pdf_page = pdf_in.getPage(i-1) #getPage is 0 index
 
-            # sometimes pages have been rotated
-            if orientation is None:
-                media_box = pdf_page["/MediaBox"]
-                lowerLeft = media_box[0], media_box[1]
-                upperRight = media_box[2], media_box[3]
-                height = abs(upperRight[1] - lowerLeft[1])
-                width = abs(upperRight[0] - lowerLeft[0])
-
-                if width < height:
-                    orientation = 'portrait'
-                else:
-                    orientation = 'landscape'
+            # # sometimes pages have been rotated
+            # if orientation is None:
+            #     media_box = pdf_page["/MediaBox"]
+            #     lowerLeft = media_box[0], media_box[1]
+            #     upperRight = media_box[2], media_box[3]
+            #     height = abs(upperRight[1] - lowerLeft[1])
+            #     width = abs(upperRight[0] - lowerLeft[0])
+            #     rotate = pdf_page["/Rotate"]
+            #     if (width < height) and (rotate == 0):
+            #         orientation = 'portrait'
+            #     else:
+            #         orientation = 'landscape'
 
             if not os.path.exists(pdf_out_file):
                 pdf_out = PyPDF2.PdfFileWriter()
@@ -134,11 +137,16 @@ class PDFDocument(object):
                                                      strict=False, thread_count=4,
                                                      poppler_path=POPPLER_INSTALL_PATH)
                 img = images[0]
-                if orientation == 'portrait':
+
+                if img.width < img.height:
+                    orientation = 'portrait'
                     img = img.rotate(90, expand=True)
+                else:
+                    orientation = 'landscape'
 
                 img.thumbnail((10000, 10000), Image.ANTIALIAS) # max image size for azure vision
                 img.save(img_out_file)
+
 
             red_image_path = os.path.join(os.path.dirname(img_out_file), "red_%s" % os.path.basename(img_out_file))
             if overwrite and os.path.exists(red_image_path):
@@ -177,3 +185,4 @@ class PDFDocument(object):
             self.pages.append(i)
 
         return extracted
+

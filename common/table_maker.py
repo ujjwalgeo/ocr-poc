@@ -35,8 +35,10 @@ def detect_table(img_file, text_size_percent=3, line_distance_percent=5, debug_m
     min_col_width = 5 * w * text_size_percent / 100
     min_row_height = 1.2 * h * text_size_percent / 100
     cells = []
-    # if len(peaks_cols > 3):
+
+    # if len(peaks_cols > 2):
     #     peaks_cols = peaks_cols[:-1]
+
     col_xs = [0] + [int(p) for p in peaks_cols] + [w] # remove last line from peaks_cols to take column to the end
     row_ys = [0] + [int(p) for p in peaks_rows] + [h]
     for i in range(1, len(row_ys)):

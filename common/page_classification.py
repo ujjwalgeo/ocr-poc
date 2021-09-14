@@ -36,9 +36,10 @@ def reset_page_type_annotations(asbuilt_id):
         idx += 1
 
 
-def annotate_elevation_page(asbuilt_id, search_text='pole elevation', annotation='POLE ELEVATION',
+def annotate_elevation_page(asbuilt_id, search_text='pole elevation',
+                            annotation='POLE ELEVATION',
                             start_page=1, position="page_bottom"):
-
+    import time
     if isinstance(asbuilt_id, str):
         asbuilt_id = ObjectId(asbuilt_id)
 
@@ -48,13 +49,11 @@ def annotate_elevation_page(asbuilt_id, search_text='pole elevation', annotation
     idx = start_page
     for abp in asbuilt_pages:
         if "ocr_analysis_id" in abp:
+            time.sleep(1)
             ocr_analysis_id = abp["ocr_analysis_id"]
             ocr_lines_query = {"analysis_id": ocr_analysis_id, "text": regx}
             ocr_lines_count = db[OCR_LINE_COLLECTION].find(ocr_lines_query).count()
 
-            # image dims are wrong due to bug
-            # page_width = abp['image_width']
-            # page_height = abp['image_height']
             img = Image.open(open(abp['image'], 'rb'))
             page_width = img.width
             page_height = img.height
@@ -62,6 +61,7 @@ def annotate_elevation_page(asbuilt_id, search_text='pole elevation', annotation
             if ocr_lines_count > 0:
                 ocr_lines = db[OCR_LINE_COLLECTION].find(ocr_lines_query)
                 ocr_lines = list(ocr_lines)
+
                 for ocr_line in ocr_lines:
                     bbox = ocr_line['boundingBox']
                     tl = (bbox[0], bbox[1])
@@ -70,6 +70,7 @@ def annotate_elevation_page(asbuilt_id, search_text='pole elevation', annotation
                     bl = (bbox[6], bbox[7])
                     rel_pos_y = ((tl[1] + br[1]) * .5) / page_height
                     rel_pos_x = ((tl[0] + br[0]) * .5) / page_width
+
                     if (position == 'page_bottom') and (rel_pos_y > 0.75):
                         coll.update_one({"_id": asbuilt["_id"]}, {'$set': {'pages.%d.page_type' % idx: annotation}})
                         print('Updated page type for %s, page %d' % (str(asbuilt["_id"]), idx))
