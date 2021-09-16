@@ -54,7 +54,9 @@
     "category": "point",
     "label_parser": {
       "patterns": [
-        "^scu$"
+        "scu:",
+        "^scu$",
+        "crown scu id:"
       ],
       "case_sensitive": false
     },

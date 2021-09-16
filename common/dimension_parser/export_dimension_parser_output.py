@@ -57,7 +57,7 @@ def export_output_csv(dbname, project_id, dimension_parser_template, site_info_t
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilt_docs = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_doc_ids = [ d["_id"] for d in asbuilt_docs ]
-    # asbuilt_doc_ids = [ '6104b3ce7ca78bc7866ee8a0' ]
+    asbuilt_doc_ids = [ '613fd5cdc7d5b6ab4642ab97' ]
 
     dimension_parser = DimensionParser(dbname, dimension_parser_template)
     site_info_parser = DimensionParser(dbname, site_info_template)

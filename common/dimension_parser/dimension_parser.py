@@ -291,7 +291,7 @@ class EntityParserTemplate(object):
                 detection.parse()
                 if detection.parsed:
                     detections.append(detection.toJson())
-                    # log.info(detection.toJson())
+                    log.info(detection.toJson())
                     # return first found detection
                     return detections
 
@@ -396,7 +396,7 @@ def detect_dimensions(dbname, project_id, template_file, append=True):
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
-    # asbuilt_ids = [ ObjectId("613fd46dc7d5b6ab4642ab8f") ]
+    # asbuilt_ids = [ ObjectId("613fd5cdc7d5b6ab4642ab97") ]
 
     mongo_hlpr.close()
     dimension_parser = DimensionParser(dbname, template_file)
@@ -425,6 +425,9 @@ def detect_dimensions(dbname, project_id, template_file, append=True):
             red_analysis_id = asbuilt_page.get('red_ocr_analysis_id')
             if red_analysis_id:
                 red_ocr_detections = dimension_parser.parse_dims(doc_id, page_number, red_analysis_id)
+                prev_red_ocr_detections = asbuilt['pages'][page_num]['red_ocr_detections']
+                if append:
+                    red_ocr_detections = red_ocr_detections + prev_red_ocr_detections
                 mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id,
                                            {"pages.%d.red_ocr_detections" % page_num: red_ocr_detections })
             page_num += 1
@@ -444,6 +447,6 @@ if __name__ == '__main__':
     detect_dimensions(dbname, project_id, template_file, append=False)
 
     template_file = './dimension_parser_templates_chicago.json'
-    detect_dimensions(dbname, project_id, template_file)
+    # detect_dimensions(dbname, project_id, template_file)
 
     # export_dimensional_lines(dbname, project_id)
