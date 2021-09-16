@@ -1,0 +1,144 @@
+[
+  {
+    "entity": "latitude",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "latitude",
+        "lat:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9][0-9][0-9][0-9]+",
+        "- [0-9]+\\.[0-9][0-9][0-9][0-9]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "multiline",
+    "scale_x": 8,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "longitude",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "longitude",
+        "long:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "-?[0-9]+\\.[0-9][0-9][0-9][0-9]+",
+        "- [0-9]+\\.[0-9][0-9][0-9][0-9]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "geo",
+    "mode": "multiline",
+    "scale_x": 8,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "scu",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "^scu$"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[0-9][0-9][0-9][0-9][0-9][0-9]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "integer",
+    "mode": "multiline",
+    "scale_x": 20,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "address",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "site address:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[a-z,0-9]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "string",
+    "mode": "multiline",
+    "scale_x": 10,
+    "scale_y": 3,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "county",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "county:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[a-z]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "string",
+    "mode": "multiline",
+    "scale_x": 10,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  },
+  {
+    "entity": "jurisdiction",
+    "category": "point",
+    "label_parser": {
+      "patterns": [
+        "jurisdiction:"
+      ],
+      "case_sensitive": false
+    },
+    "value_parser": {
+      "patterns": [
+        "[a-z]+"
+      ]
+    },
+    "delimiters": [":"],
+    "remove_spaces_in_value": true,
+    "remove_special_chars_in_label": true,
+    "value_type": "string",
+    "mode": "multiline",
+    "scale_x": 5,
+    "scale_y": 1,
+    "scale_origin": "top-left"
+  }
+]

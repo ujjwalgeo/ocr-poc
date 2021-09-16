@@ -163,29 +163,29 @@ class Detection(object):
                 self.value_feet = dim_feet
                 self.parsed = True
 
+        elif self.value_type == EntityParserTemplate.VALUE_TYPE_STRING:
+            # mat = matches[0]
+            mat = self.text
+            self.value_part = "%s" % (mat)
+            self.value_part.strip()
+            self.parsed = True
+
+            if len(self.entity.delimiters):
+                for delim in self.entity.delimiters:
+                    if delim in mat:
+                        parts = mat.split(delim)
+                        self.label_part = str(parts[0])
+                        self.value_part = "%s" % " ".join(str(p) for p in parts[1:])
+                        self.value_part = self.value_part.strip()
+                        self.parsed = True
+
+        elif self.value_type == EntityParserTemplate.VALUE_TYPE_INTEGER:
+            mat = int(matches[0])
+            self.value_part = "%d" % (mat)
+            self.parsed = True
+
         else:
             raise Exception("Incorrect value_type for entity %s" % self.entity.entity)
-
-            # value_results = self.entity.value_parser.search(self.text)
-            #
-            # if len(value_results):
-            #     value_search = value_results[0]
-            #     value_part = value_search['match']
-            #     if self.entity.remove_spaces_in_values:
-            #         value_part = "".join(value_part.split())
-            #     value_start = value_search['start']
-            #     value_end = value_search['end']
-            #
-            #     # sometimes value is to the left of the label
-            #     if value_start < len(self.text) / 5:
-            #         label_part = self.text[value_end:]
-            #     else:
-            #         label_part = self.text[:value_start]
-            #
-            #     self.label_part = str(label_part).strip()
-            #     self.value_part = str(value_part).strip()
-            #
-            #     self.parsed = True
 
         if self.category == "box":
             label_upper = self.label_part.upper()
@@ -232,7 +232,7 @@ class EntityParserTemplate(object):
 
     VALUE_TYPE_DIMENSION = 'dimension'
     VALUE_TYPE_GEO = 'geo'
-    VALUE_TYPE_INTEGER = 'int'
+    VALUE_TYPE_INTEGER = 'integer'
     VALUE_TYPE_STRING = 'string'
 
     MODE_SINGLELINE = "singleline"
@@ -245,6 +245,7 @@ class EntityParserTemplate(object):
         self.value_parser = RegexParser(template['value_parser'])
         self.remove_spaces_in_values = template.get('remove_spaces_in_value', False)
         self.remove_special_chars_in_label = template.get('remove_special_chars_in_label', False)
+        self.delimiters = template.get('delimiters', [])
 
         self.value_type = template.get('value_type', None)
         self.mode = template.get('mode', self.MODE_SINGLELINE)
@@ -255,8 +256,8 @@ class EntityParserTemplate(object):
     def parse_dims(self, mongo_helper, asbuilt_id, page_number, analysis_id, gdf=None):
         detections = []
 
-        if self.entity == 'pole':
-            print(self.entity)
+        # if self.entity == 'pole':
+        #     print(self.entity)
 
         for label_regx in self.label_parser.regexes:
             cursor = mongo_helper.query(OCR_LINE_COLLECTION,
@@ -272,7 +273,7 @@ class EntityParserTemplate(object):
                 # if mode is multiline, get more text
                 if self.mode == self.MODE_MULTILINE:
                     bbox = ocr_line['boundingBox']
-                    line_bbox = _poly_from_bbox(bbox, self.xfact, self.yfact)
+                    line_bbox = _poly_from_bbox(bbox, self.xfact, self.yfact, self.origin)
                     if not gdf.empty:
                         near_mask = gdf['geom'].apply(lambda x: x.intersects(line_bbox))
                         near_lines = gdf[near_mask]
@@ -291,6 +292,8 @@ class EntityParserTemplate(object):
                 if detection.parsed:
                     detections.append(detection.toJson())
                     # log.info(detection.toJson())
+                    # return first found detection
+                    return detections
 
         return detections
 
@@ -388,12 +391,12 @@ def export_dimensional_lines(dbname, project_id):
         print (l)
 
 
-def detect_dimensions(dbname, project_id, template_file):
+def detect_dimensions(dbname, project_id, template_file, append=True):
     from bson import ObjectId
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilts = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
     asbuilt_ids = [ad['_id'] for ad in asbuilts]
-    asbuilt_ids = [ ObjectId("613d38957cb374cad459655e") ]
+    # asbuilt_ids = [ ObjectId("613fd46dc7d5b6ab4642ab8f") ]
 
     mongo_hlpr.close()
     dimension_parser = DimensionParser(dbname, template_file)
@@ -411,7 +414,11 @@ def detect_dimensions(dbname, project_id, template_file):
             ocr_analysis_id = asbuilt_page.get('ocr_analysis_id')
             page_number = asbuilt_page['page']
             if ocr_analysis_id:
+                prev_ocr_detections = asbuilt['pages'][page_num]['ocr_detections']
                 ocr_detections = dimension_parser.parse_dims(doc_id, page_number, ocr_analysis_id)
+                if append:
+                    ocr_detections = ocr_detections + prev_ocr_detections
+
                 mongo_hlpr.update_document(ASBUILTS_COLLECTION, doc_id,
                                            {"pages.%d.ocr_detections" % page_num: ocr_detections})
 
@@ -433,6 +440,10 @@ if __name__ == '__main__':
     logger.setup('dimension_parser')
     log = logger.logger
 
+    template_file = './site_info_templates_chicago.json'
+    detect_dimensions(dbname, project_id, template_file, append=False)
+
     template_file = './dimension_parser_templates_chicago.json'
     detect_dimensions(dbname, project_id, template_file)
+
     # export_dimensional_lines(dbname, project_id)

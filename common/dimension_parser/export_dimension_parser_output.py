@@ -52,7 +52,7 @@ def get_dim_value(entity, ocr_dims):
         return None
 
 
-def export_output_csv(dbname, project_id, dimension_parser_template, page_type='proposed_pole_elevation'):
+def export_output_csv(dbname, project_id, dimension_parser_template, site_info_template, page_type='proposed_pole_elevation'):
 
     mongo_hlpr = mongodb_helper.MongoHelper(dbname)
     asbuilt_docs = mongo_hlpr.query(ASBUILTS_COLLECTION, {'project': project_id})
@@ -60,22 +60,28 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
     # asbuilt_doc_ids = [ '6104b3ce7ca78bc7866ee8a0' ]
 
     dimension_parser = DimensionParser(dbname, dimension_parser_template)
+    site_info_parser = DimensionParser(dbname, site_info_template)
 
     _data = {
-        'scu': [],
         'source_file': [],
         'filename': [],
-        'jurisdiction': [],
-        'file': [],
-        'owner': [],
-        'lat': [],
-        'lng': [],
-        'address': [],
-        'county': [],
+        # 'file': [],
+        # 'scu': [],
+        # 'jurisdiction': [],
+        # 'owner': [],
+        # 'lat': [],
+        # 'lng': [],
+        # 'address': [],
+        # 'county': [],
         'analysis_id': []
     }
 
     # create expected output dataframe
+    for k, ep in site_info_parser.entity_parsers.items():
+        _data[k] = []
+        _data["%s_comment" % k] = []
+        _data["%s_redline" % k] = []
+
     entity_parsers = dimension_parser.entity_parsers
     for k, ep in entity_parsers.items():
         _data[k] = []
@@ -99,74 +105,89 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
         county = None
         jurisdiction = None
 
-        # first look in kvp_parser
-        if ad.get('kvp_parser'):
-            kvp_parser = ad['kvp_parser']
-            if kvp_parser.get('site_info'):
-                si = kvp_parser['site_info']
-                scu = extract_from_kvp_parser_object(si, 'scu')
-                jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction')
-                # owner = kvps.get('UTILITIES:', 'XXXX')
-                latitude = extract_from_kvp_parser_object(si, 'latitude')
-                longitude = extract_from_kvp_parser_object(si, 'longitude')
-                address = extract_from_kvp_parser_object(si, 'address')
-                # county = kvps.get('COUNTY', 'XXXX')
-
-        if ad.get('site_info'):
-            if 'kvps' in ad['site_info']:
-                kvps = ad['site_info']['kvps']
-                scu = kvps.get('SCU:', scu)
-                jurisdiction = kvps.get('JURISDICTION:', None)
-                owner = kvps.get('UTILITIES:', None)
-                latitude = kvps.get('LATITUDE:', latitude)
-                longitude = kvps.get('LONGITUDE:', longitude)
-                address = kvps.get('SITE ADDRESS:', address)
-                county = kvps.get('COUNTY', None)
-
-                # look in kvp_redline_parser
-                if ad.get('kvp_parser_redline'):
-                    kvp_parser = ad['kvp_parser_redline']
-                    if kvp_parser.get('site_info'):
-                        si = kvp_parser['site_info']
-                        scu = extract_from_kvp_parser_object(si, 'scu', scu)
-                        latitude = extract_from_kvp_parser_object(si, 'latitude', latitude)
-                        longitude = extract_from_kvp_parser_object(si, 'longitude', longitude)
-                        address = extract_from_kvp_parser_object(si, 'address', address)
-                        jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction', jurisdiction)
+        # # first look in kvp_parser
+        # if ad.get('kvp_parser'):
+        #     kvp_parser = ad['kvp_parser']
+        #     if kvp_parser.get('site_info'):
+        #         si = kvp_parser['site_info']
+        #         scu = extract_from_kvp_parser_object(si, 'scu')
+        #         jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction')
+        #         # owner = kvps.get('UTILITIES:', 'XXXX')
+        #         latitude = extract_from_kvp_parser_object(si, 'latitude')
+        #         longitude = extract_from_kvp_parser_object(si, 'longitude')
+        #         address = extract_from_kvp_parser_object(si, 'address')
+        #         # county = kvps.get('COUNTY', 'XXXX')
+        #
+        # if ad.get('site_info'):
+        #     if 'kvps' in ad['site_info']:
+        #         kvps = ad['site_info']['kvps']
+        #         scu = kvps.get('SCU:', scu)
+        #         jurisdiction = kvps.get('JURISDICTION:', None)
+        #         owner = kvps.get('UTILITIES:', None)
+        #         latitude = kvps.get('LATITUDE:', latitude)
+        #         longitude = kvps.get('LONGITUDE:', longitude)
+        #         address = kvps.get('SITE ADDRESS:', address)
+        #         county = kvps.get('COUNTY', None)
+        #
+        #         # look in kvp_redline_parser
+        #         if ad.get('kvp_parser_redline'):
+        #             kvp_parser = ad['kvp_parser_redline']
+        #             if kvp_parser.get('site_info'):
+        #                 si = kvp_parser['site_info']
+        #                 scu = extract_from_kvp_parser_object(si, 'scu', scu)
+        #                 latitude = extract_from_kvp_parser_object(si, 'latitude', latitude)
+        #                 longitude = extract_from_kvp_parser_object(si, 'longitude', longitude)
+        #                 address = extract_from_kvp_parser_object(si, 'address', address)
+        #                 jurisdiction = extract_from_kvp_parser_object(si, 'jurisdiction', jurisdiction)
 
         file = os.path.basename(ad['source_file'])
 
-        _data['scu'].append(scu)
-        _data['source_file'].append(ad['source_file'])
-        _data['filename'].append(os.path.basename(ad['source_file']))
-        _data['jurisdiction'].append(jurisdiction)
-        _data['owner'].append(owner)
-        _data['file'].append(file)
-        _data['lat'].append(latitude)
-        _data['lng'].append(longitude)
-        _data['county'].append(county)
-        _data['address'].append(address)
-        _data['analysis_id'].append(str(ad['_id']))
+        # _data['scu'].append(scu)
+        # _data['source_file'].append(ad['source_file'])
+        # _data['filename'].append(os.path.basename(ad['source_file']))
+        # _data['jurisdiction'].append(jurisdiction)
+        # _data['owner'].append(owner)
+        # _data['file'].append(file)
+        # _data['lat'].append(latitude)
+        # _data['lng'].append(longitude)
+        # _data['county'].append(county)
+        # _data['address'].append(address)
 
+        _data['analysis_id'].append(str(ad['_id']))
+        _data['source_file'].append(ad['source_file'])
+        _data['filename'].append(file)
+
+        site_info_dims = []
+        site_info_red_dims = []
         page_dims = []
         page_red_dims = []
+
         page_n = 0
         for page in ad['pages']:
             pg_type = page.get('page_type', None)
-            if pg_type == page_type:
+
+            if (page['page'] == 1):
+                site_info_dims = page.get('ocr_detections', [])
+                site_info_red_dims = page.get('red_ocr_detections', [])
+                page_n = page['page']
+
+            if (pg_type == page_type):
                 page_dims = page.get('ocr_detections', [])
                 page_red_dims = page.get('red_ocr_detections', [])
                 page_n = page['page']
 
+        for k, v in site_info_parser.entity_parsers.items():
+            dim_value = get_dim_value(v, site_info_dims)
+            _data[k].append(dim_value)
+            comment = "page %d" % page_n
+            if (dim_value == "X") or (dim_value == "X-X") or (dim_value is None):
+                comment = ""
+            _data["%s_comment" % k].append(comment)
+
+            dim_red_value = get_dim_value(v, site_info_red_dims)
+            _data["%s_redline" % k].append(dim_red_value)
+
         for k, v in entity_parsers.items():
-
-            # if (v.entity == 'latitude') and (latitude is not None):
-            #     continue
-            # if (v.entity == 'longitude') and (longitude is not None):
-            #     continue
-            # if k == 'power_meter':
-            #     print(k)
-
             dim_value = get_dim_value(v, page_dims)
             _data[k].append(dim_value)
             comment = "page %d" % page_n
@@ -177,9 +198,8 @@ def export_output_csv(dbname, project_id, dimension_parser_template, page_type='
             dim_red_value = get_dim_value(v, page_red_dims)
             _data["%s_redline" % k].append(dim_red_value)
 
-
     df = pd.DataFrame(_data)
-    df = df.sort_values('scu')
+    # df = df.sort_values('scu')
     # print (df.head())
     ofile = '%s_proposed_output.csv' % project_id
     df.to_csv(ofile, index=False)
@@ -198,8 +218,10 @@ if __name__ == '__main__':
     # mongo_helper = mongodb_helper.MongoHelper(dbname=dbname)
     # match_dimensional_lines(dbname, project_id)
     # identify_labels(dbname, project_id)
+
     dimension_parser_template = './dimension_parser_templates_chicago.json'
-    export_output_csv(dbname, project_id, dimension_parser_template)
+    site_info_template = './site_info_templates_chicago.json'
+    export_output_csv(dbname, project_id, dimension_parser_template, site_info_template)
 
     # analysis_id = ObjectId ("60ff65991e23b73c6053a8b3")
     # n_pages = 3
